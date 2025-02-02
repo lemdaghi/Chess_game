@@ -13,8 +13,17 @@ class Piece :
             self.image = pygame.image.load(full_path)  # Load the image
             self.image = pygame.transform.scale(self.image, (60, 60)) # adjust the size
         except pygame.error as e:
-            print(f"❌ Erreur lors du chargement de l'image {image_path}: {e}")
+            print(f"❌ Error accuring while loading {image_path}: {e}")
         self.first_move = True # for pawn and castle
+        piece_symbols = {
+            "Pawn": "♙" if color == "white" else "♟",
+            "Rook": "♖" if color == "white" else "♜",
+            "Knight": "♘" if color == "white" else "♞",
+            "Bishop": "♗" if color == "white" else "♝",
+            "Queen": "♕" if color == "white" else "♛",
+            "King": "♔" if color == "white" else "♚",
+        }
+        self.symbol = piece_symbols[self.__class__.__name__]
 
     def get_moves(self, board):
         ''' Return a list of possible moves '''
