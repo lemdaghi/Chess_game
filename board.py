@@ -61,13 +61,33 @@ class Board:
         ''' Return a piece from its position '''
         x, y = position
         return self.grid[y][x]
+        
+    def pos_to_chess_notation(self, position):
+        """Convert position (x, y) to ('a1', 'h8')."""
+        files = "abcdefgh"
+        return f"{files[position[0]]}{8 - position[1]}"  # Ex: (4,6) → "e2"
     
     def move_piece(self, piece, new_position):
         ''' Move a piece on the board '''
-        x, y = piece.position
+        old_position = piece.position
+        x, y = old_position
         new_x, new_y = new_position
+        
+        captured_piece = self.grid[new_y][new_x]  # Verify if a piece is captured
+        if captured_piece and captured_piece.__class__.__name__ == "King":
+            print("🚨 Illegal move : King can not be captured !")
+            return False
+            
         self.grid[y][x] = None # Delete the piece from the old position in the grid
         self.grid[new_y][new_x] = piece # Put the piece on the new position in the grid
         piece.move(new_position) # Move the piece
+        piece.first_move = False # disable first_move
 
+        move_description = f"{piece.symbol} {self.pos_to_chess_notation(old_position)} → {self.pos_to_chess_notation(new_position)}"
+        if captured_piece:
+            move_description += f" (capture {captured_piece.symbol})"
+        self.game.move_history.append(move_description)  # Add history description
+        print(move_description) 
+        
+        return True
     
