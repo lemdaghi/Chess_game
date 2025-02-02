@@ -1,11 +1,12 @@
 import pygame
-from pieces import Piece, Pawn, Rook, Bishop, Knight, Queen, King  # Import de la classe mère
+from pieces import Pawn, Rook, Bishop, Knight, Queen, King  
+import copy  
 
 class Board:
     def __init__(self):
-        self.grid = [[None for _ in range(8)] for _ in range(8)]  # Empty grid
+        self.grid = [[None for _ in range(8)] for _ in range(8)]  
         self.selected_piece = None 
-        self.valid_moves = [] # valid cases to move in
+        self.valid_moves = [] 
 
         # Pawns
         for col in range(8):
@@ -18,7 +19,7 @@ class Board:
         self.grid[0][7] = Rook("black", (7, 0), f"assets/rook_black.png")
         self.grid[0][0] = Rook("black", (0, 0), f"assets/rook_black.png")
 
-        # Knight
+        # Knights
         self.grid[7][6] = Knight("white", (6, 7), f"assets/knight_white.png")
         self.grid[7][1] = Knight("white", (1, 7), f"assets/knight_white.png")
         self.grid[0][1] = Knight("black", (1, 0), f"assets/knight_black.png")
@@ -37,10 +38,8 @@ class Board:
         # Kings
         self.grid[7][4] = King("white", (4, 7), f"assets/king_white.png")
         self.grid[0][4] = King("black", (4, 0), f"assets/king_black.png")
-   
 
     def draw(self, screen):
-        ''' Draw the board and pieces '''
         SQUARE_SIZE = 75
         WHITE = (238, 238, 210)
         BLACK = (118, 150, 86)
@@ -55,39 +54,44 @@ class Board:
              for col in range(8):
                 piece = self.grid[row][col]
                 if piece:
-                    piece.draw(screen) # Draw the piece on the case
+                    piece.draw(screen)
 
     def get_piece(self, position):
-        ''' Return a piece from its position '''
         x, y = position
         return self.grid[y][x]
-        
+    
+    def move_piece(self, piece, new_position):
+        old_position = piece.position
+        x, y = old_position
+        new_x, new_y = new_position
+
+        captured_piece = self.grid[new_y][new_x] 
+         
+        if captured_piece and isinstance(captured_piece, King) and piece.color != captured_piece.color:
+            print(f"🚨 Mouvement illégal de {piece.color} {piece.__class__.__name__}: Un Roi ne peut pas être capturé !")
+            return False
+            
+        self.grid[y][x] = None  
+        self.grid[new_y][new_x] = piece  
+        piece.position = (new_x, new_y)  
+        piece.first_move = False  
+
+        return True
+
     def pos_to_chess_notation(self, position):
         """Convert position (x, y) to ('a1', 'h8')."""
         files = "abcdefgh"
         return f"{files[position[0]]}{8 - position[1]}"  # Ex: (4,6) → "e2"
     
-    def move_piece(self, piece, new_position):
-        ''' Move a piece on the board '''
-        old_position = piece.position
-        x, y = old_position
-        new_x, new_y = new_position
-        
-        captured_piece = self.grid[new_y][new_x]  # Verify if a piece is captured
-        if captured_piece and captured_piece.__class__.__name__ == "King":
-            print("🚨 Illegal move : King can not be captured !")
-            return False
-            
-        self.grid[y][x] = None # Delete the piece from the old position in the grid
-        self.grid[new_y][new_x] = piece # Put the piece on the new position in the grid
-        piece.move(new_position) # Move the piece
-        piece.first_move = False # disable first_move
-
-        move_description = f"{piece.symbol} {self.pos_to_chess_notation(old_position)} → {self.pos_to_chess_notation(new_position)}"
-        if captured_piece:
-            move_description += f" (capture {captured_piece.symbol})"
-        self.game.move_history.append(move_description)  # Add history description
-        print(move_description) 
-        
-        return True
-    
+    def copy(self):
+        """Retourne une copie du plateau sans copier les images pygame."""
+        new_board = Board()
+        for y in range(8):
+            for x in range(8):
+                piece = self.grid[y][x]
+                if piece:
+                    # ✅ Crée une nouvelle instance de la pièce avec son `image_path`
+                    new_piece = piece.__class__(piece.color, piece.position, piece.image_path)
+                    new_piece.first_move = piece.first_move  # ✅ Garde l'info du premier mouvement
+                    new_board.grid[y][x] = new_piece
+        return new_board
