@@ -222,4 +222,19 @@ class King(Piece):
                     board.grid[y][x] = self  # Remet le Roi à sa place initiale
                     self.position = old_position  # ✅ On restaure la position du Roi
 
+        # Verify Castle
+        if self.first_move and not ChessRules.is_in_check(board, self.color):
+            # Grand roque
+            if all(board.get_piece((i, y)) is None for i in range(1, 4)): # aucune piece entre le roi et la tour
+                rook = board.get_piece((0, y)) # Queen side / left side
+                if rook and isinstance(rook, Rook) and rook.first_move:
+                    if not any(ChessRules.is_in_check(board, self.color) for i in range(1, 3)):
+                        moves.append((2, y))
+
+            # Petit roque
+            if all(board.get_piece((i, y)) is None for i in range(5, 7)): # aucune piece entre le roi et la tour
+                rook = board.get_piece((7, y)) # Queen side / left side
+                if rook and isinstance(rook, Rook) and rook.first_move:
+                    if not any(ChessRules.is_in_check(board, self.color) for i in range(5, 7)):
+                        moves.append((6, y))
         return moves

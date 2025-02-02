@@ -73,6 +73,17 @@ class Board:
             print(f"🚨 Mouvement illégal de {piece.color} {piece.__class__.__name__}: Un Roi ne peut pas être capturé !")
             return False
         
+        # ✅ Vérification du Roque
+        if isinstance(piece, King) and abs(new_x - x) == 2:  
+            if new_x == 2:  # Grand Roque (vers la gauche)
+                self.grid[y][0] = None  
+                self.grid[y][3] = Rook(piece.color, (3, y), f"assets/rook_{piece.color}.png")  
+
+            elif new_x == 6:  # Petit Roque (vers la droite)
+                self.grid[y][7] = None  
+                self.grid[y][5] = Rook(piece.color, (5, y), f"assets/rook_{piece.color}.png")
+        
+        # Verify pinning
         # ✅ 1. Simuler le mouvement
         self.grid[y][x] = None  # On enlève la pièce de sa position actuelle
         self.grid[new_y][new_x] = piece  # On la place sur la nouvelle case

@@ -186,7 +186,5 @@ class Game:
     #         print("🏆 Victoire des Blancs par échec et mat !")
     #         self.game_over = True
 
-# TODO: if the piece is nailed
 # TODO: en passant
-# TODO: illegal moves (for king)
 # TODO; Castle
