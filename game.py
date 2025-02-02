@@ -19,6 +19,7 @@ class Game:
             if(x,y) in self.board.valid_moves: # we are trying to move the piece to valid position
                 self.board.move_piece(self.board.selected_piece, (x,y))
                 self.switch_turn()
+                self.check_victory()
             self.board.selected_piece = None
             self.board.valid_moves = [] 
 
@@ -77,14 +78,19 @@ class Game:
             return False  # Impossible
 
         # Verify if the king can escape
+        original_position = king.position
+
         for move in king.get_moves(self.board):
-            temp_board = self.board  # Save temporarily
-            self.board.move_piece(king, move)  # Test the move
+            target_piece = self.board.get_piece(move)
+            self.board.move_piece(king, move) # Test the move
+
             if not self.is_in_check(color):  # if the king is no more checked
-                self.board = temp_board  # Restore the state
+                self.board.move_piece(king, original_position)  # Restore the king position
+                self.board.grid[move[1]][move[0]] = target_piece # Restore the eaten piece
                 return False
-        self.board = temp_board  # Restore the state
-        
+        self.board.move_piece(king, original_position)  # Restore the state
+        self.board.grid[move[1]][move[0]] = target_piece # Restore the eaten piece
+
         # TO DO: Add the case where another piece can protect him by eating the piece or by interception
         return True  # The king is checkmat
 
@@ -92,6 +98,8 @@ class Game:
         if self.is_checkmate("white"):
             print("Victoire des Noirs par échec et mat !")
             self.game_over = True
+            return
         elif self.is_checkmate("black"):
             print("Victoire des Blancs par échec et mat !")
             self.game_over = True
+            return

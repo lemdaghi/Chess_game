@@ -1,5 +1,5 @@
 import pygame
-from pieces import Piece, Pawn, Rook  # Import de la classe mère
+from pieces import Piece, Pawn, Rook, Bishop, Knight, Queen, King  # Import de la classe mère
 
 class Board:
     def __init__(self):
@@ -9,34 +9,34 @@ class Board:
 
         # Pawns
         for col in range(8):
-            self.grid[1][col] = Pawn("white", (col, 1), f"assets/pawn_white.png")
-            self.grid[6][col] = Pawn("black", (col, 6), f"assets/pawn_black.png")
+            self.grid[6][col] = Pawn("white", (col, 6), f"assets/pawn_white.png")
+            self.grid[1][col] = Pawn("black", (col, 1), f"assets/pawn_black.png")
 
         # Rooks
-        self.grid[0][7] = Rook("white", (7, 0), f"assets/rook_white.png")
-        self.grid[0][0] = Rook("white", (0, 0), f"assets/rook_white.png")
-        self.grid[7][0] = Rook("black", (0, 7), f"assets/rook_black.png")
-        self.grid[7][7] = Rook("black", (7, 7), f"assets/rook_black.png")
+        self.grid[7][0] = Rook("white", (0, 7), f"assets/rook_white.png")
+        self.grid[7][7] = Rook("white", (7, 7), f"assets/rook_white.png")
+        self.grid[0][7] = Rook("black", (7, 0), f"assets/rook_black.png")
+        self.grid[0][0] = Rook("black", (0, 0), f"assets/rook_black.png")
 
         # Knight
-        self.grid[0][6] = Rook("white", (6, 0), f"assets/knight_white.png")
-        self.grid[0][1] = Rook("white", (1, 0), f"assets/knight_white.png")
-        self.grid[7][1] = Rook("black", (1, 7), f"assets/knight_black.png")
-        self.grid[7][6] = Rook("black", (6, 7), f"assets/knight_black.png")
+        self.grid[7][6] = Knight("white", (6, 7), f"assets/knight_white.png")
+        self.grid[7][1] = Knight("white", (1, 7), f"assets/knight_white.png")
+        self.grid[0][1] = Knight("black", (1, 0), f"assets/knight_black.png")
+        self.grid[0][6] = Knight("black", (6, 0), f"assets/knight_black.png")
 
         # Bishops
-        self.grid[0][5] = Rook("white", (5, 0), f"assets/bishop_white.png")
-        self.grid[0][2] = Rook("white", (2, 0), f"assets/bishop_white.png")
-        self.grid[7][2] = Rook("black", (2, 7), f"assets/bishop_black.png")
-        self.grid[7][5] = Rook("black", (5, 7), f"assets/bishop_black.png")
+        self.grid[7][5] = Bishop("white", (5, 7), f"assets/bishop_white.png")
+        self.grid[7][2] = Bishop("white", (2, 7), f"assets/bishop_white.png")
+        self.grid[0][2] = Bishop("black", (2, 0), f"assets/bishop_black.png")
+        self.grid[0][5] = Bishop("black", (5, 0), f"assets/bishop_black.png")
 
         # Queens
-        self.grid[0][4] = Rook("white", (4, 0), f"assets/queen_white.png")
-        self.grid[7][4] = Rook("black", (4, 7), f"assets/queen_black.png")
+        self.grid[7][3] = Queen("white", (3, 7), f"assets/queen_white.png")
+        self.grid[0][3] = Queen("black", (3, 0), f"assets/queen_black.png")
 
         # Kings
-        self.grid[0][3] = Rook("white", (3, 0), f"assets/king_white.png")
-        self.grid[7][3] = Rook("black", (3, 7), f"assets/king_black.png")
+        self.grid[7][4] = King("white", (4, 7), f"assets/king_white.png")
+        self.grid[0][4] = King("black", (4, 0), f"assets/king_black.png")
    
 
     def draw(self, screen):
