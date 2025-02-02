@@ -61,10 +61,12 @@ class Game:
         
     def is_checkmate(self, color):
         """ Return True if the player 'color' is checkmated """
+        print("cheching checkmate")
         if not self.is_in_check(color):
             return False  # No check, No mat
                
         king = None
+        attackers = []  # List of opponent pieces that are checking the king
 
         # Found the king of the current_player
         for row in range(8):
@@ -72,12 +74,13 @@ class Game:
                 piece = self.board.grid[row][col]
                 if piece and piece.__class__.__name__ == "King" and piece.color == color:
                     king = piece
-                    break
+                elif piece and piece.color != color and king.position in piece.get_moves(self.board):
+                    attackers.append(piece)  # Add the piece to attackers list
 
         if not king:
             return False  # Impossible
 
-        # Verify if the king can escape
+        # 1️⃣ Verify if the king can escape
         original_position = king.position
 
         for move in king.get_moves(self.board):
@@ -91,7 +94,44 @@ class Game:
         self.board.move_piece(king, original_position)  # Restore the state
         self.board.grid[move[1]][move[0]] = target_piece # Restore the eaten piece
 
-        # TO DO: Add the case where another piece can protect him by eating the piece or by interception
+        # The King can not escape
+        if len(attackers) > 1:
+            return True  # It's a checkmate
+        
+        # 2️⃣ Verify if a piece can eat the attacker
+        attacker = attackers[0]
+        for row in range(8):
+            for col in range(8):
+                piece = self.board.grid[row][col]
+                if piece and piece.color == color:
+                    if attacker.position in piece.get_moves(self.board): 
+                        return False
+        
+        # 3️⃣ Verify if a piece can parry the attack
+        if attacker.__class__.__name__ == "Knight":
+            return True # Can not parry a Kinght attack
+
+        x1, y1 = king.position
+        x2, y2 = attacker.position
+        path = [] 
+
+        dx = (x2 - x1) // max(1, abs(x2 - x1))  # 0 if same row, else 1
+        dy = (y2 - y1) // max(1, abs(y2 - y1))  # 0 if same col, else 1
+
+        nx, ny = x1 + dx, y1 + dy
+        while (nx, ny) != (x2, y2):
+            path.append((nx, ny))
+            nx += dx
+            ny += dy
+
+        for row in range(8):
+            for col in range(8):
+                piece = self.board.grid[row][col]
+                if piece and piece.color == color:
+                    for move in piece.get_moves(self.board):
+                        if move in path:
+                            return False
+                        
         return True  # The king is checkmat
 
     def check_victory(self):
@@ -103,3 +143,8 @@ class Game:
             print("Victoire des Blancs par échec et mat !")
             self.game_over = True
             return
+
+# TODO: if the piece is nailed
+# TODO: en passant
+# TODO: illegal moves (for king)
+# TODO; Castle
