@@ -61,19 +61,34 @@ class Board:
         return self.grid[y][x]
     
     def move_piece(self, piece, new_position):
+        from chess_rules import ChessRules 
+
         old_position = piece.position
         x, y = old_position
         new_x, new_y = new_position
 
         captured_piece = self.grid[new_y][new_x] 
-         
+
         if captured_piece and isinstance(captured_piece, King) and piece.color != captured_piece.color:
             print(f"🚨 Mouvement illégal de {piece.color} {piece.__class__.__name__}: Un Roi ne peut pas être capturé !")
             return False
+        
+        # ✅ 1. Simuler le mouvement
+        self.grid[y][x] = None  # On enlève la pièce de sa position actuelle
+        self.grid[new_y][new_x] = piece  # On la place sur la nouvelle case
+        piece.position = (new_x, new_y)  # Mise à jour temporaire de la position
+
+        # ✅ 2. Vérifier si le Roi de la même couleur est en échec après ce mouvement
+        if ChessRules.is_in_check(self, piece.color):
+            print(f"🚫 Mouvement illégal ! {piece.symbol} ({piece.__class__.__name__}) est cloué et ne peut pas bouger !")
+
+            # ✅ 3. Annuler le mouvement (restaurer l'état initial)
+            self.grid[new_y][new_x] = captured_piece  # Remet la pièce capturée (si existante)
+            self.grid[y][x] = piece  # Remet la pièce à sa position initiale
+            piece.position = old_position  # Restauration de la position initiale
             
-        self.grid[y][x] = None  
-        self.grid[new_y][new_x] = piece  
-        piece.position = (new_x, new_y)  
+            return False  # 🚫 Mouvement interdit car il expose le Roi
+ 
         piece.first_move = False  
 
         return True

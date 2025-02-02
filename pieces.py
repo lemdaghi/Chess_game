@@ -49,9 +49,10 @@ class Pawn(Piece):
 
     def get_moves(self, board, simulate=False):
         moves = []
+        
         x, y = self.position
         direction = -1 if self.color == "white" else 1 # WHITE goes up, BLACK goes down
-
+    
         # Move forward one square
         if 0 <= y + direction < 8 and board.grid[y + direction][x] is None: # if we are not moving over the board, and there is no piece there
             moves.append((x, y + direction))
@@ -71,12 +72,12 @@ class Rook(Piece):
         super().__init__(color, position, image_path)
 
     def get_moves(self, board, simulate=False):
-        if not hasattr(board, "grid"):  # ✅ Vérifie que `board` a bien `.grid`
-            print(f"🚨 ERREUR: `board` est un `{type(board)}` au lieu de `Board`")
-            return []
-        
+
+
         moves = []
         x, y = self.position
+
+        
         directions = [(0, 1), (0, -1), (1, 0), (-1, 0)] # UP, DOWN, LEFT, RIGHT
         
         for dx, dy in directions:
@@ -106,6 +107,7 @@ class Knight(Piece):
 
     def get_moves(self, board, simulate=False):
         moves = []
+        
         x, y = self.position
         directions = [
             (2, 1), (2, -1), (-2, 1), (-2, -1),
@@ -127,8 +129,10 @@ class Bishop(Piece):
         super().__init__(color, position, image_path)
 
     def get_moves(self, board, simulate=False):
+
         moves = []
         x, y = self.position
+        
         directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)] # Diagonals
         
         for dx, dy in directions:
@@ -157,8 +161,11 @@ class Queen(Piece):
         super().__init__(color, position, image_path)
 
     def get_moves(self, board, simulate=False):
+        from chess_rules import ChessRules  
+
         moves = []
         x, y = self.position
+    
         directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)] # all directions
         
         for dx, dy in directions:
@@ -189,6 +196,8 @@ class King(Piece):
     def get_moves(self, board, simulate = True):
         """Retourne les mouvements possibles du Roi en excluant les cases attaquées."""
         moves = []
+        
+    
         old_position = self.position
         x, y = old_position
         directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]  # Toutes les directions
