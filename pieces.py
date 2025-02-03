@@ -228,7 +228,7 @@ class King(Piece):
             if all(board.get_piece((i, y)) is None for i in range(1, 4)): # aucune piece entre le roi et la tour
                 rook = board.get_piece((0, y)) # Queen side / left side
                 if rook and isinstance(rook, Rook) and rook.first_move:
-                    if not any(ChessRules.is_in_check(board, self.color) for i in range(1, 3)):
+                    if not any(ChessRules.is_in_check(board, self.color, (i, y)) for i in range(2, 5)):
                         moves.append((2, y))
 
             # Petit roque

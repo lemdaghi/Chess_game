@@ -54,28 +54,70 @@ class ChessRules:
 
     #     return False  # ✅ Pas de clouage
 
+    
+    def is_in_check(board, color, position=None, ignore_castling=False):
+        """Retourne True si le Roi de 'color' est en échec, sauf si on ignore la vérification pour le Roque."""
+        king_pos = None
+        
+        if position:
+            king_pos = position
+        else:
+            for row in board.grid:
+                for piece in row:
+                    if piece and piece.__class__.__name__ == "King" and piece.color == color:
+                        king_pos = piece.position
+                        break
 
-    @staticmethod
-    def is_in_check(board, color):
-        """Retourne True si le Roi de 'color' est en échec."""
-        king = None
-        for row in board.grid:
-            for piece in row:
-                if piece and piece.__class__.__name__ == "King" and piece.color == color:
-                    king = piece
-                    break
-               
-        if not king:
-            return False  
-        print(f"{king.color} King is in {king.position}")
+        if not king_pos:
+            print('No King')
+            return False
+          
+        x, y = king_pos
+        print(f"🔎 Vérification de l'échec pour {color} en {position if position else king_pos}")
+
+        # ✅ Simulation temporaire en enlevant la pièce à cet endroit
+        temp_piece = board.get_piece(king_pos)
+        board.grid[y][x] = None 
+        
+        # Vérifier toutes les pièces adverses
+        in_check = False
         for row in board.grid:
             for piece in row:
                 if piece and piece.color != color and piece.__class__.__name__ != "King":
-                    if king.position in piece.get_moves(board, simulate=True):
-                        print(f"{king.color} King is checked by {piece.color} {piece.__class__.__name__} in {piece.position}")
-                        return True  
+                    if king_pos in piece.get_moves(board, simulate=True):
+                        print(f"⚠️ {color} est en échec en {king_pos} par {piece.color} {piece.__class__.__name__} en {piece.position}")
+                        in_check = True
+                        break  
+                    
+        # ✅ Restauration de la pièce d'origine
+        board.grid[y][x] = temp_piece
+        return in_check  
 
-        return False  
+
+    # @staticmethod
+    # def is_in_check(board, color, position=None):
+    #     """Retourne True si le Roi de 'color' est en échec."""
+    #     king = None
+    #     if position:
+    #         x, y = position
+    #     else:
+    #         for row in board.grid:
+    #             for piece in row:
+    #                 if piece and piece.__class__.__name__ == "King" and piece.color == color:
+    #                     king = piece
+    #                     break
+                
+    #     if not king:
+    #         return False  
+    #     print(f"{king.color} King is in {king.position}")
+    #     for row in board.grid:
+    #         for piece in row:
+    #             if piece and piece.color != color and piece.__class__.__name__ != "King":
+    #                 if king.position in piece.get_moves(board, simulate=True):
+    #                     print(f"{king.color} King is checked by {piece.color} {piece.__class__.__name__} in {piece.position}")
+    #                     return True  
+
+    #     return False  
 
     @staticmethod
     def is_checkmate(board, color):

@@ -187,4 +187,5 @@ class Game:
     #         self.game_over = True
 
 # TODO: en passant
-# TODO; Castle
+# TODO: Castle
+# TODO: king opposition
