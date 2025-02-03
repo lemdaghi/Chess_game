@@ -7,6 +7,7 @@ class Board:
         self.grid = [[None for _ in range(8)] for _ in range(8)]  
         self.selected_piece = None 
         self.valid_moves = [] 
+        self.last_move = None # save last move
 
         # Pawns
         for col in range(8):
@@ -254,6 +255,22 @@ class Board:
 
             print("✅ Roque effectué avec succès !")
             return True  
+        
+        # ✅ Capture "En Passant"
+        if isinstance(piece, Pawn) and self.last_move:
+            last_piece, (old_x, old_y), (last_new_x, last_new_y) = self.last_move
+
+            if isinstance(last_piece, Pawn) and last_piece.color != piece.color:
+                if abs(old_y - last_new_y) == 2 and old_x == last_new_x:  # Double-pas adverse
+                    direction = (1 if piece.color == "white" else -1)
+                    print(f"🔍 Vérification 'En Passant':")
+                    print(f"   ➤ new_x: {new_x}, new_y: {new_y}")
+                    print(f"   ➤ last_new_x: {last_new_x}, last_new_y: {last_new_y}")
+                    print(f"   ➤ Attendu: {(last_new_x, y - direction)}")
+                    if (new_x, new_y) == (last_new_x, y - direction) and y == last_new_y:
+                        print(f"♟️ Capture 'En Passant' de {last_piece.symbol} en {last_new_x}, {last_new_y}")
+                        self.grid[last_new_y][last_new_x] = None  # ✅ SUPPRIME le pion adverse capturé
+                        captured_piece = last_piece  # ✅ Marque la pièce comme capturée pour l'historique
 
         # ✅ Vérification classique du mouvement normal (hors Roque)
         self.grid[y][x] = None  # On enlève la pièce de sa position actuelle
@@ -283,6 +300,10 @@ class Board:
             return False  # 🚫 Mouvement interdit car il expose le Roi
 
         piece.first_move = False  
+
+        # ✅ Sauvegarde le dernier coup joué
+        self.last_move = (piece, old_position, new_position)
+
         return True
 
     def is_king_opposition(self, king):

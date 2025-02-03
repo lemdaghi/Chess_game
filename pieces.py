@@ -52,19 +52,32 @@ class Pawn(Piece):
         
         x, y = self.position
         direction = -1 if self.color == "white" else 1 # WHITE goes up, BLACK goes down
-    
+
+        ## Moving
         # Move forward one square
         if 0 <= y + direction < 8 and board.grid[y + direction][x] is None: # if we are not moving over the board, and there is no piece there
             moves.append((x, y + direction))
+            # Move forward two squares (from the initial line)
             if self.first_move and 0 <= y + 2 * direction < 8 and board.grid[y + 2 * direction][x] is None:
                 moves.append((x, y + 2 * direction))
 
+        ## Eating
         # Diagonal Eating
         for dx in [-1, 1]:
             if 0 <= x + dx < 8 and 0 <= y + direction < 8:
                 target = board.grid[y + direction][x + dx]
                 if target and target.color != self.color: # if there is an opponent piece in the front immediate diagonal cases 
                     moves.append((x + dx, y + direction))
+
+        # En Passant
+        if board.last_move:  # Vérifie s'il y a eu un dernier mouvement
+            last_piece, (old_x, old_y), (new_x, new_y) = board.last_move
+
+            # Vérifie si le dernier coup était un double-pas d'un pion adverse
+            if isinstance(last_piece, Pawn) and last_piece.color != self.color:
+                if abs(old_y - new_y) == 2 and new_y == y and abs(new_x - x) == 1:  # ✅ Correction de la condition
+                    moves.append((new_x, y + direction))  # ✅ En passant se fait sur la même colonne
+
         return moves
 
 class Rook(Piece):

@@ -186,6 +186,4 @@ class Game:
     #         print("🏆 Victoire des Blancs par échec et mat !")
     #         self.game_over = True
 
-# TODO: en passant
-# TODO: Castle
-# TODO: king opposition
+# TODO: Pawn transformation
