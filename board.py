@@ -1,13 +1,13 @@
 import pygame
-from pieces import Pawn, Rook, Bishop, Knight, Queen, King  
-import copy  
+from chess_rules import ChessRules
+from pieces import Piece, Pawn, Rook, Bishop, Knight, Queen, King  # Import de la classe mère
 
 class Board:
     def __init__(self):
-        self.grid = [[None for _ in range(8)] for _ in range(8)]  
+
+        self.grid = [[None for _ in range(8)] for _ in range(8)]  # Empty grid
         self.selected_piece = None 
-        self.valid_moves = [] 
-        self.last_move = None # save last move
+        self.valid_moves = [] # valid cases to move in
 
         # Pawns
         for col in range(8):
@@ -20,7 +20,7 @@ class Board:
         self.grid[0][7] = Rook("black", (7, 0), f"assets/rook_black.png")
         self.grid[0][0] = Rook("black", (0, 0), f"assets/rook_black.png")
 
-        # Knights
+        # Knight
         self.grid[7][6] = Knight("white", (6, 7), f"assets/knight_white.png")
         self.grid[7][1] = Knight("white", (1, 7), f"assets/knight_white.png")
         self.grid[0][1] = Knight("black", (1, 0), f"assets/knight_black.png")
@@ -39,8 +39,11 @@ class Board:
         # Kings
         self.grid[7][4] = King("white", (4, 7), f"assets/king_white.png")
         self.grid[0][4] = King("black", (4, 0), f"assets/king_black.png")
+   
+        # self.game = game
 
     def draw(self, screen):
+        ''' Draw the board and pieces '''
         SQUARE_SIZE = 75
         WHITE = (238, 238, 210)
         BLACK = (118, 150, 86)
@@ -55,286 +58,54 @@ class Board:
              for col in range(8):
                 piece = self.grid[row][col]
                 if piece:
-                    piece.draw(screen)
+                    piece.draw(screen) # Draw the piece on the case
 
     def get_piece(self, position):
+        ''' Return a piece from its position '''
         x, y = position
         return self.grid[y][x]
     
-    # def move_piece(self, piece, new_position):
-    #     from chess_rules import ChessRules 
-
-    #     old_position = piece.position
-    #     x, y = old_position
-    #     new_x, new_y = new_position
-
-    #     captured_piece = self.grid[new_y][new_x] 
-
-    #     if captured_piece and isinstance(captured_piece, King) and piece.color != captured_piece.color:
-    #         print(f"🚨 Mouvement illégal de {piece.color} {piece.__class__.__name__}: Un Roi ne peut pas être capturé !")
-    #         return False
-        
-    #     # # ✅ Vérification du Roque
-    #     # if isinstance(piece, King) and abs(new_x - x) == 2:
-    #     #     print("King Castle Verification")
-            
-    #     #     # Petit Roque (côté Roi)
-    #     #     if new_x == 6:
-    #     #         rook = self.grid[y][7]
-    #     #         if rook and isinstance(rook, Rook) and rook.first_move:
-    #     #             if all(self.get_piece((i, y)) is None for i in range(5, 7)) and \
-    #     #             not any(ChessRules.is_in_check(self, piece.color, (i, y), ignore_castling=True) for i in range(4, 7)):  
-    #     #                 self.grid[y][7] = None  
-    #     #                 self.grid[y][5] = rook  
-    #     #                 rook.position = (5, y)
-    #     #             else:
-    #     #                 print("🚫 Roque interdit : le Roi traverse une case attaquée !")
-    #     #                 return False
-
-    #     #     # Grand Roque (côté Dame)
-    #     #     elif new_x == 2:
-    #     #         rook = self.grid[y][0]
-    #     #         if rook and isinstance(rook, Rook) and rook.first_move:
-    #     #             if all(self.get_piece((i, y)) is None for i in range(1, 4)) and \
-    #     #             not any(ChessRules.is_in_check(self, piece.color, (i, y), ignore_castling=True) for i in range(2, 4)):  
-    #     #                 self.grid[y][0] = None  
-    #     #                 self.grid[y][3] = rook  
-    #     #                 rook.position = (3, y)
-    #     #             else:
-    #     #                 print("🚫 Roque interdit : le Roi traverse une case attaquée !")
-    #     #                 return False
-        
-    #     # ✅ Vérification du Roque
-    #     if isinstance(piece, King) and abs(new_x - x) == 2:
-    #         print("King Castle Verification")
-
-    #         # if King is checked, no Castle
-    #         if ChessRules.is_in_check(self, piece.color):
-    #             print("🚫 Roque interdit : le Roi est déjà en échec !")
-    #             return False
-            
-    #         # Determine Castle type
-    #         if new_x == 6:  # Petit Roque (côté Roi)
-    #             rook_x, rook_new_x = 7, 5
-    #             path = [(5, y), (6, y)]  # Cases que le Roi traverse
-    #             check_path = [(4, y), (5, y), (6, y)]  # Cases que l'on vérifie pour l'échec
-    #         elif new_x == 2:  # Grand Roque (côté Dame)
-    #             rook_x, rook_new_x = 0, 3
-    #             path = [(1, y), (2, y), (3, y)]  # Cases que le Roi traverse
-    #             check_path = [(2, y), (3, y), (4, y)]  # Cases que l'on vérifie pour l'échec
-    #         else:
-    #             return False  # Sécurité : ce n'est pas un Roque
-
-    #         # Vérifier que les cases du chemin sont vides
-    #         if any(self.get_piece(pos) is not None for pos in path):
-    #             print("🚫 Roque interdit : une pièce bloque le chemin !")
-    #             return False 
-
-    #         # Vérifier que le Roi ne traverse pas une case attaquée
-    #         for pos in check_path:
-    #             if ChessRules.is_in_check(self, piece.color, pos):
-    #                 print(f"🚫 Roque interdit : la case {pos} est attaquée !")
-    #                 return False      
-            
-    #         # Vérifier que la Tour est bien en place et n'a pas bougé
-    #         rook = self.grid[y][rook_x]
-    #         if not rook or not isinstance(rook, Rook) or not rook.first_move:
-    #             print("🚫 Roque interdit : la Tour a déjà bougé ou est absente !")
-    #             return False
-            
-    #         # 1️⃣ Déplacer le Roi d'abord
-    #         self.grid[y][x] = None  # Supprime le Roi de son ancienne position
-    #         self.grid[new_y][new_x] = piece  # Place le Roi sur la nouvelle case
-    #         piece.position = (new_x, new_y)  # Met à jour la position du Roi
-
-    #         if not ChessRules.is_in_check(self, piece.color):
-    #             # 2️⃣ Ensuite déplacer la Tour
-    #             self.grid[y][rook_x] = None  
-    #             self.grid[y][rook_new_x] = rook  
-    #             rook.position = (rook_new_x, y)
-    #         else:
-    #             print("Vérification après coup")
-    #             self.grid[y][x] = piece  
-    #             self.grid[new_y][new_x] = None  
-    #             piece.position = (x, y)  # Met à jour la position du Roi
-    #             return False
-            
-
-    #         # Marquer que le Roi et la Tour ont bougé
-    #         piece.first_move = False  
-    #         rook.first_move = False
-
-    #         print("✅ Roque effectué avec succès !")
-    #         return True  
-
-    #     # Verify pinning
-    #     # ✅ 1. Simuler le mouvement
-    #     self.grid[y][x] = None  # On enlève la pièce de sa position actuelle
-    #     self.grid[new_y][new_x] = piece  # On la place sur la nouvelle case
-    #     piece.position = (new_x, new_y)  # Mise à jour temporaire de la position
-
-    #     # ✅ 2. Vérifier si le Roi de la même couleur est en échec après ce mouvement
-    #     if not isinstance(piece, King) and ChessRules.is_in_check(self, piece.color):
-    #         print(f"🚫 Mouvement illégal ! {piece.symbol} ({piece.__class__.__name__}) est cloué et ne peut pas bouger !")
-
-    #         # ✅ 3. Annuler le mouvement (restaurer l'état initial)
-    #         self.grid[new_y][new_x] = captured_piece  # Remet la pièce capturée (si existante)
-    #         self.grid[y][x] = piece  # Remet la pièce à sa position initiale
-    #         piece.position = old_position  # Restauration de la position initiale
-            
-    #         return False  # 🚫 Mouvement interdit car il expose le Roi
- 
-    #     piece.first_move = False  
-
-    #     return True
-
-    def move_piece(self, piece, new_position):
-        from chess_rules import ChessRules  
-
-        old_position = piece.position
-        x, y = old_position
-        new_x, new_y = new_position
-
-        captured_piece = self.grid[new_y][new_x]  
-
-        if captured_piece and isinstance(captured_piece, King) and piece.color != captured_piece.color:
-            print(f"🚨 Mouvement illégal de {piece.color} {piece.__class__.__name__}: Un Roi ne peut pas être capturé !")
-            return False
-
-        # ✅ Vérification du Roque
-        if isinstance(piece, King) and abs(new_x - x) == 2:
-            print("♔ King Castle Verification...")
-
-            # Vérifier que le Roi n'est pas en échec avant le Roque
-            if ChessRules.is_in_check(self, piece.color):
-                print("🚫 Roque interdit : le Roi est en échec !")
-                return False  
-
-            # Déterminer le type de Roque et la position de la Tour
-            if new_x == 6:  # Petit Roque (côté Roi)
-                print("petit roque")
-                rook_x, rook_new_x = 7, 5
-                path = [(5, y), (6, y)]  # Cases traversées par le Roi
-            elif new_x == 2:  # Grand Roque (côté Dame)
-                print("grand roque")
-                rook_x, rook_new_x = 0, 3
-                path = [(3, y), (2, y)]  # Cases traversées par le Roi
-            else:
-                return False  # Sécurité : ce n'est pas un Roque
-
-            # Vérifier que les cases du chemin sont vides
-            if any(self.get_piece(pos) is not None for pos in path):
-                print("🚫 Roque interdit : une pièce bloque le chemin !")
-                return False  
-
-            # **Vérifier si le Roi traverse une case attaquée**
-            for pos in path:
-                if ChessRules.is_in_check(self, piece.color, pos):
-                    print(f"🚫 Roque interdit : le Roi passe par une case attaquée {pos} !")
-                    return False  
-
-            # Vérifier que la Tour est bien en place et n'a pas bougé
-            rook = self.grid[y][rook_x]
-            if not rook or not isinstance(rook, Rook) or not rook.first_move:
-                print("🚫 Roque interdit : la Tour a déjà bougé ou est absente !")
-                return False
-
-            # ✅ Déplacer d'abord le Roi
-            self.grid[y][x] = None  
-            self.grid[y][new_x] = piece  
-            piece.position = (new_x, y)  
-
-            # ✅ Ensuite déplacer la Tour
-            self.grid[y][rook_x] = None  
-            self.grid[y][rook_new_x] = rook  
-            rook.position = (rook_new_x, y)  
-
-            # Marquer que le Roi et la Tour ont bougé
-            piece.first_move = False  
-            rook.first_move = False  
-
-            print("✅ Roque effectué avec succès !")
-            return True  
-        
-        # ✅ Capture "En Passant"
-        if isinstance(piece, Pawn) and self.last_move:
-            last_piece, (old_x, old_y), (last_new_x, last_new_y) = self.last_move
-
-            if isinstance(last_piece, Pawn) and last_piece.color != piece.color:
-                if abs(old_y - last_new_y) == 2 and old_x == last_new_x:  # Double-pas adverse
-                    direction = (1 if piece.color == "white" else -1)
-                    print(f"🔍 Vérification 'En Passant':")
-                    print(f"   ➤ new_x: {new_x}, new_y: {new_y}")
-                    print(f"   ➤ last_new_x: {last_new_x}, last_new_y: {last_new_y}")
-                    print(f"   ➤ Attendu: {(last_new_x, y - direction)}")
-                    if (new_x, new_y) == (last_new_x, y - direction) and y == last_new_y:
-                        print(f"♟️ Capture 'En Passant' de {last_piece.symbol} en {last_new_x}, {last_new_y}")
-                        self.grid[last_new_y][last_new_x] = None  # ✅ SUPPRIME le pion adverse capturé
-                        captured_piece = last_piece  # ✅ Marque la pièce comme capturée pour l'historique
-
-        # ✅ Vérification classique du mouvement normal (hors Roque)
-        self.grid[y][x] = None  # On enlève la pièce de sa position actuelle
-        self.grid[new_y][new_x] = piece  # On la place sur la nouvelle case
-        piece.position = (new_x, new_y)  # Mise à jour temporaire de la position
-
-        # ✅ Vérification : Opposition des Rois
-        if isinstance(piece, King) and self.is_king_opposition(piece):
-            print(f"🚫 Mouvement illégal ! {piece.color} King ne peut pas s'opposer directement au Roi adverse !")
-
-            # ✅ Restaurer l'état initial
-            self.grid[new_y][new_x] = captured_piece  # Remettre la pièce capturée si besoin
-            self.grid[y][x] = piece  # Remettre le Roi à sa position initiale
-            piece.position = old_position  # Restauration de la position initiale
-
-            return False  # 🚫 Mouvement interdit car il crée une opposition des Rois
-
-        # ✅ Vérifier si le Roi est en échec après ce mouvement (SAUF si c'est un Roi)
-        if not isinstance(piece, King) and ChessRules.is_in_check(self, piece.color):
-            print(f"🚫 Mouvement illégal ! {piece.symbol} ({piece.__class__.__name__}) est cloué et ne peut pas bouger !")
-
-            # ✅ Annuler le mouvement (restaurer l'état initial)
-            self.grid[new_y][new_x] = captured_piece  # Remet la pièce capturée (si existante)
-            self.grid[y][x] = piece  # Remet la pièce à sa position initiale
-            piece.position = old_position  # Restauration de la position initiale
-            
-            return False  # 🚫 Mouvement interdit car il expose le Roi
-
-        piece.first_move = False  
-
-        # ✅ Sauvegarde le dernier coup joué
-        self.last_move = (piece, old_position, new_position)
-
-        return True
-
-    def is_king_opposition(self, king):
-        """Vérifie si un autre Roi est adjacent à la position actuelle du Roi."""
-        x, y = king.position
-        directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-
-        for dx, dy in directions:
-            nx, ny = x + dx, y + dy
-            if 0 <= nx < 8 and 0 <= ny < 8:
-                piece = self.get_piece((nx, ny))
-                if piece and isinstance(piece, King) and piece.color != king.color:
-                    print(f"🚫 Mouvement illégal : Opposition des Rois détectée en {king.position} !")
-                    return True  # ✅ Il y a un autre Roi adjacent → Opposition illégale
-
-        return False  # ✅ Aucun Roi adjacent → Mouvement possible
-
     def pos_to_chess_notation(self, position):
         """Convert position (x, y) to ('a1', 'h8')."""
         files = "abcdefgh"
         return f"{files[position[0]]}{8 - position[1]}"  # Ex: (4,6) → "e2"
     
-    def copy(self):
-        """Retourne une copie du plateau sans copier les images pygame."""
-        new_board = Board()
-        for y in range(8):
-            for x in range(8):
-                piece = self.grid[y][x]
-                if piece:
-                    # ✅ Crée une nouvelle instance de la pièce avec son `image_path`
-                    new_piece = piece.__class__(piece.color, piece.position, piece.image_path)
-                    new_piece.first_move = piece.first_move  # ✅ Garde l'info du premier mouvement
-                    new_board.grid[y][x] = new_piece
-        return new_board
+    # def move_piece(self, piece, new_position):
+    #     ''' Move a piece on the board '''
+    #     x, y = piece.position
+    #     new_x, new_y = new_position
+    #     self.grid[y][x] = None # Delete the piece from the old position in the grid
+    #     self.grid[new_y][new_x] = piece # Put the piece on the new position in the grid
+    #     piece.move(new_position) # Move the piece
+
+    def move_piece(self, piece, new_position):
+        """Déplace une pièce et enregistre le mouvement."""
+        old_position = piece.position
+        x, y = old_position
+        new_x, new_y = new_position
+
+        captured_piece = self.grid[new_y][new_x]  # ✅ Vérifie si une pièce est capturée
+        if captured_piece and captured_piece.__class__.__name__ == "King":
+            print("🚨 Mouvement illégal : Un Roi ne peut pas être capturé !")
+            return False
+        
+        # Déplacement de la pièce
+        self.grid[y][x] = None  # Enlève la pièce de sa position actuelle
+        self.grid[new_y][new_x] = piece  # Place la pièce sur la nouvelle position
+        piece.position = (new_x, new_y)  # Met à jour la position de la pièce
+        piece.first_move = False
+
+        # Notation échiquéenne
+        move_description = f"{piece.symbol} {self.pos_to_chess_notation(old_position)} → {self.pos_to_chess_notation(new_position)}"
+        if captured_piece:
+            move_description += f" (capture {captured_piece.symbol})"
+
+        # Game.move_history.append(move_description)  # ✅ Ajoute au journal des coups
+        # print(move_description)  # ✅ Affiche le coup en console
+
+        return True
+
+
+
+
+    
