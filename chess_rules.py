@@ -84,7 +84,16 @@ class ChessRules:
         for row in board.grid:
             for piece in row:
                 if piece and piece.color != color and piece.__class__.__name__ != "King":
-                    if king_pos in piece.get_moves(board, simulate=True):
+                    # ✅ Vérification spéciale pour les Pions
+                    if piece.__class__.__name__ == "Pawn":
+                        direction = -1 if piece.color == "white" else 1  # Blancs montent, Noirs descendent
+                        for dx in [-1, 1]:  # Attaque en diagonale
+                            px, py = piece.position
+                            if (px + dx, py + direction) == (x, y):  # Le Roi est sur une case attaquée
+                                print(f"⚠️ {color} King est en échec par {piece.symbol} en {piece.position} via attaque en diagonale")
+                                in_check = True
+                                break
+                    elif king_pos in piece.get_moves(board, simulate=True):
                         print(f"⚠️ {color} est en échec en {king_pos} par {piece.color} {piece.__class__.__name__} en {piece.position}")
                         in_check = True
                         break  
