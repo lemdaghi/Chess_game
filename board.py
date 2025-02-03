@@ -260,6 +260,17 @@ class Board:
         self.grid[new_y][new_x] = piece  # On la place sur la nouvelle case
         piece.position = (new_x, new_y)  # Mise à jour temporaire de la position
 
+        # ✅ Vérification : Opposition des Rois
+        if isinstance(piece, King) and self.is_king_opposition(piece):
+            print(f"🚫 Mouvement illégal ! {piece.color} King ne peut pas s'opposer directement au Roi adverse !")
+
+            # ✅ Restaurer l'état initial
+            self.grid[new_y][new_x] = captured_piece  # Remettre la pièce capturée si besoin
+            self.grid[y][x] = piece  # Remettre le Roi à sa position initiale
+            piece.position = old_position  # Restauration de la position initiale
+
+            return False  # 🚫 Mouvement interdit car il crée une opposition des Rois
+
         # ✅ Vérifier si le Roi est en échec après ce mouvement (SAUF si c'est un Roi)
         if not isinstance(piece, King) and ChessRules.is_in_check(self, piece.color):
             print(f"🚫 Mouvement illégal ! {piece.symbol} ({piece.__class__.__name__}) est cloué et ne peut pas bouger !")
@@ -274,6 +285,20 @@ class Board:
         piece.first_move = False  
         return True
 
+    def is_king_opposition(self, king):
+        """Vérifie si un autre Roi est adjacent à la position actuelle du Roi."""
+        x, y = king.position
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < 8 and 0 <= ny < 8:
+                piece = self.get_piece((nx, ny))
+                if piece and isinstance(piece, King) and piece.color != king.color:
+                    print(f"🚫 Mouvement illégal : Opposition des Rois détectée en {king.position} !")
+                    return True  # ✅ Il y a un autre Roi adjacent → Opposition illégale
+
+        return False  # ✅ Aucun Roi adjacent → Mouvement possible
 
     def pos_to_chess_notation(self, position):
         """Convert position (x, y) to ('a1', 'h8')."""
