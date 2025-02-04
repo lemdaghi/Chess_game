@@ -152,50 +152,6 @@ class ChessRules:
         print("⚖️ Match nul par PAT ! Aucun coup légal possible.")
         return True  # ✅ Aucun coup légal → C'est un PAT !
 
-    # @staticmethod
-    # def is_insufficient_material(board):
-    #     """Retourne True si la partie est nulle par manque de matériel."""
-    #     pieces = []
-    #     bishops = []
-
-    #     for row in board.grid:
-    #         for piece in row:
-    #             if piece:
-    #                 pieces.append(piece)
-                    
-    #                 # Si on dépasse 4 pièces, inutile de continuer, ce n'est pas un draw
-    #                 if len(pieces) > 4:
-    #                     return False  
-
-    #                 # On stocke les fous pour vérifier s'ils sont sur la même couleur
-    #                 if piece.__class__.__name__ == "Bishop":
-    #                     bishops.append(piece)
-
-    #     num_pieces = len(pieces)
-
-    #     # ✅ Cas 1 : Seulement 2 rois
-    #     if num_pieces == 2:
-    #         print("⚖️ Match nul : Matériel insuffisant (Roi vs Roi).")
-    #         return True
-
-    #     # ✅ Cas 2 : Roi + (Cavalier OU Fou) contre Roi seul
-    #     if num_pieces == 3:
-    #         for piece in pieces:
-    #             if piece.__class__.__name__ not in ["Bishop", "Knight", "King"]:
-    #                 return False
-    #             else:
-    #                 print("⚖️ Match nul : Matériel insuffisant (Roi vs Roi et Cavalier/Fou)")
-    #                 return True
-
-    #     # ✅ Cas 3 : Roi et Fou vs Roi et Fou (même couleur de cases)
-    #     if num_pieces == 4 and len(bishops) == 2:
-    #         # Vérifier si les fous sont sur la même couleur de case
-    #         if (bishops[0].position[0] + bishops[0].position[1]) % 2 == (bishops[1].position[0] + bishops[1].position[1]) % 2:
-    #             print("⚖️ Match nul : Matériel insuffisant (Roi et Fou vs Roi et Fou sur même couleur).")
-    #             return True
-
-    #     return False  # Pas de matériel insuffisant
-
     @staticmethod
     def is_insufficient_material(board):
         """Retourne True si la partie est nulle par manque de matériel."""

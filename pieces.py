@@ -174,8 +174,6 @@ class Queen(Piece):
         super().__init__(color, position, image_path)
 
     def get_moves(self, board, simulate=False):
-        from chess_rules import ChessRules  
-
         moves = []
         x, y = self.position
     
@@ -208,6 +206,7 @@ class King(Piece):
 
     def get_moves(self, board, simulate = True):
         """Retourne les mouvements possibles du Roi en excluant les cases attaquées."""
+        from chess_rules import ChessRules  # ✅ Import pour éviter les dépendances circulaires
         moves = []
         
     
@@ -226,7 +225,6 @@ class King(Piece):
                     board.grid[ny][nx] = self  # Met le Roi sur la nouvelle case
                     self.position = (nx, ny)  # Met à jour la position temporaire
 
-                    from chess_rules import ChessRules  # ✅ Import pour éviter les dépendances circulaires
                     if not ChessRules.is_in_check(board, self.color):  
                         moves.append((nx, ny))  # ✅ Ajoute la case si elle est sûre
 
