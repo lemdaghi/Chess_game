@@ -132,9 +132,7 @@ class Board:
         
         # ✅ Vérifier si un Pion atteint la dernière rangée pour la promotion
         if isinstance(piece, Pawn) and (new_y == 0 or new_y == 7):
-            print(f"♟️ {piece.color} Pawn atteint la dernière ligne ({new_y}) : Promotion requise !")
-
-            # 👉 Choix automatique en Dame (pour l'instant)
+            print(f"♟️ {piece.color} Pawn atteint la dernière ligne ({new_y}) : Promotion requise !")            
             promoted_piece = self.promote_pawn(piece)
             self.grid[new_y][new_x] = promoted_piece  # Remplace le Pion par la Reine
             piece = promoted_piece  # ✅ Mise à jour de la référence mémoire pour éviter tout bug

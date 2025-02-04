@@ -99,5 +99,3 @@ class Game:
         if self.is_fifty_move_rule():
             print("⚖️ Partie nulle par la règle des 50 coups !")
             self.game_over = True
-
-# TODO: Pawn transformation
