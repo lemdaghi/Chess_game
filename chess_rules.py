@@ -1,60 +1,6 @@
 class ChessRules:
-    # @staticmethod
-    # def is_pinned(board, piece):
-    #     """Retourne True si la pièce est clouée et ne peut pas bouger librement."""
-    #     print(f"Verifying if {piece.color} {piece.__class__.__name__} is pinned")
-    #     if piece.__class__.__name__ == "King":  
-    #         return False  # ✅ Le Roi ne peut jamais être "cloué"
 
-    #     king = None
-    #     for row in board.grid:
-    #         for p in row:
-    #             if p and p.__class__.__name__ == "King" and p.color == piece.color:
-    #                 king = p
-    #                 break
-
-    #     if not king:
-    #         print(f"🚨 ERREUR: Impossible de trouver le Roi de {piece.color} !")
-    #         return False  
-
-    #     x1, y1 = piece.position
-    #     x2, y2 = king.position
-
-    #     # ✅ Vérifier si la pièce et le Roi sont alignés (même ligne, colonne ou diagonale)
-    #     if x1 == x2 or y1 == y2 or abs(x1 - x2) == abs(y1 - y2):
-    #         direction_x = (x2 - x1) // max(1, abs(x2 - x1)) if x1 != x2 else 0
-    #         direction_y = (y2 - y1) // max(1, abs(y2 - y1)) if y1 != y2 else 0
-
-    #         # ✅ Vérifier s'il y a exactement UNE pièce entre la pièce testée et le Roi
-    #         path = []
-    #         nx, ny = x1 + direction_x, y1 + direction_y
-    #         while (nx, ny) != (x2, y2):
-    #             path.append((nx, ny))
-    #             nx += direction_x
-    #             ny += direction_y
-    #         print("je suis la")
-    #         pieces_between = [board.get_piece(pos) for pos in path if board.get_piece(pos)]
-    #         if len(pieces_between) != 0:
-    #             print(f"il y a pas qu'une seule piece entre {piece.color} {piece.__class__.__name__} et le roi {king.color}")
-    #             return False  # ✅ Il y a d'autres pièces entre la pièce et le Roi, donc pas cloué
-
-    #         print(f"il y a exactement une piece entre {piece.color} {piece.__class__.__name__} et le roi {king.color} ")
-    #         # ✅ Vérifier si un attaquant est aligné et menace directement le Roi après la pièce
-    #         nx, ny = x2 + direction_x, y2 + direction_y
-    #         while 0 <= nx < 8 and 0 <= ny < 8:
-    #             attacker = board.get_piece((nx, ny))
-    #             if attacker and attacker.color != piece.color and attacker.__class__.__name__ in ["Rook", "Bishop", "Queen"]:
-    #                 print(f"⚠️ {piece.symbol} ({piece.__class__.__name__}) est cloué par {attacker.symbol} en {attacker.position} !")
-    #                 return True  # ✅ La pièce est clouée car un attaquant l'aligne avec le Roi
-    #             elif attacker:
-    #                 break  # ✅ Une autre pièce bloque la ligne d'attaque
-
-    #             nx += direction_x
-    #             ny += direction_y
-
-    #     return False  # ✅ Pas de clouage
-
-    
+    @staticmethod
     def is_in_check(board, color, position=None, ignore_castling=False):
         """Retourne True si le Roi de 'color' est en échec, sauf si on ignore la vérification pour le Roque."""
         king_pos = None
@@ -73,7 +19,6 @@ class ChessRules:
             return False
           
         x, y = king_pos
-        print(f"🔎 Vérification de l'échec pour {color} en {position if position else king_pos}")
 
         # ✅ Simulation temporaire en enlevant la pièce à cet endroit
         temp_piece = board.get_piece(king_pos)
@@ -90,43 +35,15 @@ class ChessRules:
                         for dx in [-1, 1]:  # Attaque en diagonale
                             px, py = piece.position
                             if (px + dx, py + direction) == (x, y):  # Le Roi est sur une case attaquée
-                                print(f"⚠️ {color} King est en échec par {piece.symbol} en {piece.position} via attaque en diagonale")
                                 in_check = True
                                 break
                     elif king_pos in piece.get_moves(board, simulate=True):
-                        print(f"⚠️ {color} est en échec en {king_pos} par {piece.color} {piece.__class__.__name__} en {piece.position}")
                         in_check = True
                         break  
                     
         # ✅ Restauration de la pièce d'origine
         board.grid[y][x] = temp_piece
         return in_check  
-
-
-    # @staticmethod
-    # def is_in_check(board, color, position=None):
-    #     """Retourne True si le Roi de 'color' est en échec."""
-    #     king = None
-    #     if position:
-    #         x, y = position
-    #     else:
-    #         for row in board.grid:
-    #             for piece in row:
-    #                 if piece and piece.__class__.__name__ == "King" and piece.color == color:
-    #                     king = piece
-    #                     break
-                
-    #     if not king:
-    #         return False  
-    #     print(f"{king.color} King is in {king.position}")
-    #     for row in board.grid:
-    #         for piece in row:
-    #             if piece and piece.color != color and piece.__class__.__name__ != "King":
-    #                 if king.position in piece.get_moves(board, simulate=True):
-    #                     print(f"{king.color} King is checked by {piece.color} {piece.__class__.__name__} in {piece.position}")
-    #                     return True  
-
-    #     return False  
 
     @staticmethod
     def is_checkmate(board, color):
@@ -144,6 +61,7 @@ class ChessRules:
             print("🚨 ERREUR: Impossible de trouver le Roi !")
             return False  
 
+        print(f"⚠️ {color} King est en échec")
         # 1️⃣ Vérifier si le Roi peut s’échapper
         original_position = king.position  # ✅ Sauvegarde la position initiale du Roi
         for move in king.get_moves(board):  # ✅ Teste chaque déplacement possible
@@ -215,3 +133,21 @@ class ChessRules:
 
         return True  # ✅ Si rien ne peut sauver le Roi, alors ÉCHEC ET MAT.
 
+    @staticmethod
+    def is_stalemate(board, color):
+        """Vérifie si le joueur `color` est en situation de PAT."""
+        if ChessRules.is_in_check(board, color):
+            return False  # ✅ S'il est en échec, ce n'est pas un PAT
+
+        # 🔎 Parcourir toutes les pièces du joueur
+        for row in board.grid:
+            for piece in row:
+                if piece and piece.color == color:
+                    valid_moves = piece.get_moves(board)  # Récupérer les mouvements légaux
+                    
+                    for move in valid_moves[:]:  # ✅ On utilise une copie pour éviter les modifications directes
+                        if board.check_legal_move(piece, move):  
+                            return False  # ✅ Il y a encore au moins un coup légal → Pas de PAT
+                    
+        print("⚖️ Match nul par PAT ! Aucun coup légal possible.")
+        return True  # ✅ Aucun coup légal → C'est un PAT !
