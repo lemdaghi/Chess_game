@@ -291,6 +291,8 @@ class Board:
     def copy(self):
         """Retourne une copie du plateau sans copier les images pygame."""
         new_board = Board()
+        new_board.grid = [[None for _ in range(8)] for _ in range(8)]
+        
         for y in range(8):
             for x in range(8):
                 piece = self.grid[y][x]

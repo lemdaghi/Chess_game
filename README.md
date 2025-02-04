@@ -1,2 +1,2 @@
 # Chess_game
-Game plan
+Python version should be >= 3.7

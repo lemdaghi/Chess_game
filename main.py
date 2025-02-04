@@ -16,6 +16,11 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             game.handle_click(pygame.mouse.get_pos())
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_u:  # "U" pour Undo
+                game.undo_move()
+            elif event.key == pygame.K_r:  # "R" pour Restart
+                game.restart_game()
 
     font = pygame.font.Font(None, 24)
     for index, move in enumerate(game.get_move_history()):
