@@ -256,6 +256,16 @@ class Board:
             print("✅ Roque effectué avec succès !")
             return True  
         
+        # ✅ Vérifier si un Pion atteint la dernière rangée pour la promotion
+        if isinstance(piece, Pawn) and (new_y == 0 or new_y == 7):
+            print(f"♟️ {piece.color} Pawn atteint la dernière ligne ({new_y}) : Promotion requise !")
+
+            # 👉 Choix automatique en Dame (pour l'instant)
+            promoted_piece = self.promote_pawn(piece)
+            self.grid[new_y][new_x] = promoted_piece  # Remplace le Pion par la Reine
+            piece = promoted_piece  # ✅ Mise à jour de la référence mémoire pour éviter tout bug
+            print(f"🎉 {piece.color} Pawn promu en {piece.symbol} !")
+        
         # ✅ Capture "En Passant"
         if isinstance(piece, Pawn) and self.last_move:
             last_piece, (old_x, old_y), (last_new_x, last_new_y) = self.last_move
@@ -320,6 +330,21 @@ class Board:
                     return True  # ✅ Il y a un autre Roi adjacent → Opposition illégale
 
         return False  # ✅ Aucun Roi adjacent → Mouvement possible
+    
+    def promote_pawn(self, piece):
+        """Permet au joueur de choisir en quoi promouvoir le Pion."""
+        choices = {
+            "Q": Queen(piece.color, piece.position, f"assets/queen_{piece.color}.png"),
+            "R": Rook(piece.color, piece.position, f"assets/rook_{piece.color}.png"),
+            "B": Bishop(piece.color, piece.position, f"assets/bishop_{piece.color}.png"),
+            "N": Knight(piece.color, piece.position, f"assets/knight_{piece.color}.png"),
+        }
+        
+        while True:
+            choice = input("♟️ Promotion ! Choisissez (Q)Queen, (R)Rook, (B)Bishop, (N)Knight: ").upper()
+            if choice in choices:
+                return choices[choice]
+            print("❌ Choix invalide, réessayez.")
 
     def pos_to_chess_notation(self, position):
         """Convert position (x, y) to ('a1', 'h8')."""
