@@ -14,6 +14,7 @@ class Game:
     def handle_click(self, position):
         if self.game_over:
             print("🚫 La partie est terminée.")
+            self.propose_rematch()
             return
         
         x, y = position[0] // 75, position[1] // 75
@@ -116,7 +117,16 @@ class Game:
         self.history = []  # ✅ Efface l'historique
         self.count_moves = 0
         print("🔄 La partie a été redémarrée.")
-    
+
+    def propose_rematch(self):
+        """Propose a rematch and reset the game if accepted."""
+        response = input("🔄 Do you want a rematch? (yes/no): ").strip().lower()
+        if response == "yes":
+            self.restart_game()
+        else:
+            print("🎉 Game over! Thanks for playing!")
+
+
     def is_fifty_move_rule(self):
         """Retourne True si la règle des 50 coups s'applique."""
         if self.count_moves >= 100:  # ✅ 100 demi-coups = 50 coups complets
@@ -130,9 +140,11 @@ class Game:
         if ChessRules.is_checkmate(self.board, "white"):
             print("🏆 Victoire des Noirs par échec et mat !")
             self.game_over = True
+            return
         elif ChessRules.is_checkmate(self.board, "black"):
             print("🏆 Victoire des Blancs par échec et mat !")
             self.game_over = True
+            return
         
         if ChessRules.is_stalemate(self.board, self.current_player):
             print("⚖️ Partie nulle par PAT !")
@@ -152,3 +164,6 @@ class Game:
         if self.is_fifty_move_rule():
             print("⚖️ Partie nulle par la règle des 50 coups !")
             self.game_over = True
+            return
+
+        
