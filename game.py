@@ -52,7 +52,7 @@ class Game:
 
         elif clicked_piece and clicked_piece.color == self.current_player: # We just selected a piece, making sure the player selected his own pieces
             self.board.selected_piece = clicked_piece
-            self.board.valid_moves = clicked_piece.get_moves(self.board)
+            self.board.valid_moves = [move for move in clicked_piece.get_moves(self.board) if self.board.check_legal_move(clicked_piece, move)]
 
     def switch_turn(self):
         if self.current_player == "white":

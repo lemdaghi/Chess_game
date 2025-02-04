@@ -45,18 +45,29 @@ class Board:
         SQUARE_SIZE = 75
         WHITE = (238, 238, 210)
         BLACK = (118, 150, 86)
+        GREEN = (0, 255, 0)
 
+        # Draw Board
         for row in range(8):
             for col in range(8):
                 color = WHITE if (row + col) % 2 == 0 else BLACK
                 pygame.draw.rect(screen, color, 
                                 (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
+        # Draw Pieces
         for row in range(8):
              for col in range(8):
                 piece = self.grid[row][col]
                 if piece:
                     piece.draw(screen)
+
+        # Draw Points on valid cases to move on
+        if self.selected_piece:
+            for move in self.valid_moves:
+                move_x, move_y = move
+                center_x = move_x * SQUARE_SIZE + SQUARE_SIZE // 2
+                center_y = move_y * SQUARE_SIZE + SQUARE_SIZE // 2
+                pygame.draw.circle(screen, GREEN, (center_x, center_y), 10)
 
     def get_piece(self, position):
         x, y = position
