@@ -26,6 +26,7 @@ class Game:
                     move_description = f"{self.board.selected_piece.symbol} {self.board.pos_to_chess_notation(old_position)} → {self.board.pos_to_chess_notation((x, y))}"
                     self.move_history.append(move_description)
                     print(move_description)
+                    self.board.record_position()
                     self.switch_turn()
                     self.check_victory()
                 else:
@@ -64,6 +65,11 @@ class Game:
 
         if ChessRules.is_insufficient_material(self.board):
             print("⚖️ Partie nulle par manque de matériel !")
+            self.game_over = True
+            return
+        
+        if self.board.is_triple_repetition():
+            print("⚖️ Partie nulle par triple répétition !")
             self.game_over = True
             return
 # TODO: Pawn transformation

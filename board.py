@@ -8,6 +8,7 @@ class Board:
         self.selected_piece = None 
         self.valid_moves = [] 
         self.last_move = None # save last move
+        self.position_history = {}
 
         # Pawns
         for col in range(8):
@@ -257,6 +258,21 @@ class Board:
 
         return True  # ✅ Mouvement autorisé !
 
+    def record_position(self):
+        """Enregistre la position actuelle de l'échiquier."""
+        position_key = tuple((piece.__class__.__name__, piece.color, piece.position) for row in self.grid for piece in row if piece)
+        if position_key in self.position_history:
+            self.position_history[position_key] += 1
+        else:
+            self.position_history[position_key] = 1
+
+    def is_triple_repetition(self):
+        """Retourne True si la même position est apparue trois fois."""
+        for count in self.position_history.values():
+            if count >= 3:
+                print("⚖️ Match nul par Triple Répétition !")
+                return True
+        return False
 
     def pos_to_chess_notation(self, position):
         """Convert position (x, y) to ('a1', 'h8')."""
