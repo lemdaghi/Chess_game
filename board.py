@@ -242,7 +242,6 @@ class Board:
 
         # 🔍 Vérification d'un échec sur son propre roi
         if ChessRules.is_in_check(self, piece.color):
-            print(f"🚫 {piece.symbol} ({piece.__class__.__name__}) met son Roi en échec en bougeant !")
 
             # ✅ Restauration de l'état
             self.grid[new_y][new_x] = captured_piece  

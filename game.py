@@ -62,4 +62,8 @@ class Game:
             self.game_over = True
             return
 
+        if ChessRules.is_insufficient_material(self.board):
+            print("⚖️ Partie nulle par manque de matériel !")
+            self.game_over = True
+            return
 # TODO: Pawn transformation
