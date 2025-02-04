@@ -81,6 +81,11 @@ class Game:
         return self.move_history
 
     def undo_move(self):
+        if self.game_over:
+            print("Game is over, You can not undo anymore !")
+            self.propose_rematch()
+            return
+
         if self.history:
             print("📜 Dernier état enregistré avant annulation :")
             self.print_board(self.history[-1][0])
