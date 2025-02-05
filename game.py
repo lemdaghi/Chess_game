@@ -6,7 +6,7 @@ from board import Board
 from chess_rules import ChessRules
 
 class Game:
-    def __init__(self):
+    def __init__(self, time_control = "rapid"):
         self.board = Board()
         self.current_player = "white"
         self.game_over = False
@@ -14,8 +14,16 @@ class Game:
         self.history = []
         self.count_moves = 0
 
+        # ⏳ **Define available time controls**
+        self.time_options = {
+            "bullet": 60,  # 1 minutes (60 sec)
+            "blitz": 300,   # 5 minutes (300 sec) [DEFAULT]
+            "rapid": 600,  # 10 minutes (600 sec)
+            "classical": 3600  # 1 hour (3600 sec)
+        }
+
         # 🕰️ Initialize player clocks (10 minutes each)
-        self.time_control = 60  # 600 seconds = 10 minutes
+        self.time_control = self.time_options.get(time_control, 600)
         self.player_timers = {"white": self.time_control, "black": self.time_control}
 
         # 🕰️ Start the clock

@@ -1,13 +1,32 @@
 import pygame
 from game import Game
 
+def choose_time_control():
+    print("\n🎯 Select a Time Control:")
+    print("1️⃣ Bullet (1 min)")
+    print("2️⃣ Blitz (5 min)")
+    print("3️⃣ Rapid (10 min) [Default]")
+    print("4️⃣ Classical (1 hour)")
+
+    choice = input("👉 Enter a number (1-4): ")
+
+    time_modes = {
+        "1": "bullet",
+        "2": "blitz",
+        "3": "rapid",
+        "4": "classical"
+    }
+    
+    return time_modes.get(choice, "rapid")  # Default to Blitz
+
 pygame.init()
 WIDTH, HEIGHT = 600, 600
 SQUARE_SIZE = WIDTH // 8
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Game")
 
-game = Game()
+selected_time_control = choose_time_control()
+game = Game(time_control=selected_time_control)
 running = True
 
 while running:
