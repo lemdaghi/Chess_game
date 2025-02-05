@@ -1,4 +1,7 @@
 import pygame
+import time
+import threading
+
 from board import Board
 from chess_rules import ChessRules
 
@@ -10,6 +13,16 @@ class Game:
         self.move_history = []
         self.history = []
         self.count_moves = 0
+
+        # 🕰️ Initialize player clocks (10 minutes each)
+        self.time_control = 60  # 600 seconds = 10 minutes
+        self.player_timers = {"white": self.time_control, "black": self.time_control}
+
+        # 🕰️ Start the clock
+        self.running = True
+        self.clock_thread = threading.Thread(target=self.run_clock)
+        self.clock_thread.daemon = True
+        self.clock_thread.start()
 
     def handle_click(self, position):
         if self.game_over:
@@ -61,6 +74,9 @@ class Game:
             self.current_player = "black"
         else:
             self.current_player = "white"
+        
+        # 🕰️ Print the updated time after switching turns
+        self.display_time()
 
     def print_board(self, board):
         """Affiche l'échiquier dans le terminal pour debug."""
@@ -79,6 +95,36 @@ class Game:
     def get_move_history(self):
         """Retourne l'historique des coups joués."""
         return self.move_history
+    
+    def run_clock(self):
+        """Runs the chess clock for both players."""
+        while self.running and not self.game_over:
+            time.sleep(1)  # Wait for 1 second
+            if not self.game_over:
+                self.player_timers[self.current_player] -= 1
+
+                # 🛑 If a player runs out of time, they lose
+                if self.player_timers[self.current_player] <= 0:
+                    print(f"⏳ {self.current_player.capitalize()} ran out of time! Game Over.")
+                    opponent = "white" if self.current_player == "black" else "black"
+                    print(f"⏳🏆 {opponent.capitalize()} Wins by time !")
+                    self.game_over = True
+                    break  # Stop the clock
+
+                # 🕰️ Display remaining time
+                self.display_time()
+
+    def display_time(self):
+        """Displays the remaining time for each player."""
+        white_time = self.format_time(self.player_timers["white"])
+        black_time = self.format_time(self.player_timers["black"])
+        print(f"⏳ White: {white_time} | Black: {black_time}")
+
+    def format_time(self, seconds):
+        """Formats the time as MM:SS."""
+        minutes = seconds // 60
+        sec = seconds % 60
+        return f"{minutes:02}:{sec:02}"
 
     def undo_move(self):
         if self.game_over:
@@ -170,5 +216,9 @@ class Game:
             print("⚖️ Partie nulle par la règle des 50 coups !")
             self.game_over = True
             return
+        
+        # ⏹️ Stop the clock if the game is over
+        if self.game_over:
+            self.running = False
 
         
