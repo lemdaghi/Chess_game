@@ -89,6 +89,10 @@ class Board:
         # ✅ Vérification du Roque
         if isinstance(piece, King) and abs(new_x - x) == 2:
             print("♔ King Castle Verification...")
+            
+            # Vérifier que le roi n'a pas encore été déplacé
+            if not piece.first_move:
+                return False
 
             # Vérifier que le Roi n'est pas en échec avant le Roque
             if ChessRules.is_in_check(self, piece.color):
@@ -107,12 +111,17 @@ class Board:
             else:
                 return False  # Sécurité : ce n'est pas un Roque
 
+            # Vérifier que les tours n'ont pas été déplacés
+            rook = self.get_piece((rook_x, y))
+            if not rook.first_move:
+                return False
+            
             # Vérifier que les cases du chemin sont vides
             if any(self.get_piece(pos) is not None for pos in path):
                 print("🚫 Roque interdit : une pièce bloque le chemin !")
                 return False  
 
-            # **Vérifier si le Roi traverse une case attaquée**
+            # Vérifier si le Roi traverse une case attaquée
             for pos in path:
                 if ChessRules.is_in_check(self, piece.color, pos):
                     print(f"🚫 Roque interdit : le Roi passe par une case attaquée {pos} !")
@@ -197,6 +206,7 @@ class Board:
 
     def is_king_opposition(self, king):
         """Vérifie si un autre Roi est adjacent à la position actuelle du Roi."""
+        print("King opposition verification")
         x, y = king.position
         directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
@@ -292,7 +302,7 @@ class Board:
         """Retourne une copie du plateau sans copier les images pygame."""
         new_board = Board()
         new_board.grid = [[None for _ in range(8)] for _ in range(8)]
-        
+
         for y in range(8):
             for x in range(8):
                 piece = self.grid[y][x]
