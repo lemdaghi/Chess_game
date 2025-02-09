@@ -19,14 +19,31 @@ def choose_time_control():
     
     return time_modes.get(choice, "rapid")  # Default to Blitz
 
+def get_player_mode():
+    """Prompt the user to choose between playing with another player or AI."""
+    print("Welcome to Chess!")
+    print("Choose your mode:")
+    print("1. Two Players")
+    print("2. Play Against AI")
+    
+    choice = input("Enter 1 or 2: ").strip()
+    if choice == "1":
+        return "two_players"
+    elif choice == "2":
+        return "vs_ai"
+    else:
+        print("Invalid choice. Defaulting to Two Players mode.")
+        return "two_players"
+
 pygame.init()
 WIDTH, HEIGHT = 600, 600
 SQUARE_SIZE = WIDTH // 8
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Game")
 
+player_mode = get_player_mode()
 selected_time_control = choose_time_control()
-game = Game(time_control=selected_time_control)
+game = Game(mode = player_mode, time_control = selected_time_control)
 running = True
 
 while running:
@@ -37,6 +54,8 @@ while running:
             game.handle_click(pygame.mouse.get_pos())
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_u:  # "U" pour Undo
+                if player_mode == "vs_ai":
+                    game.undo_move()
                 game.undo_move()
             elif event.key == pygame.K_r:  # "R" pour Restart
                 game.restart_game()

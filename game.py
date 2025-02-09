@@ -2,17 +2,20 @@ import pygame
 import time
 import threading
 
+from ai import AIPlayer  # Import the AI logic
+
 from board import Board
 from chess_rules import ChessRules
 
 class Game:
-    def __init__(self, time_control = "rapid"):
+    def __init__(self, mode="2_players", time_control = "rapid"):
         self.board = Board()
         self.current_player = "white"
         self.game_over = False
         self.move_history = []
         self.history = []
         self.count_moves = 0
+        self.mode = mode
 
         # ⏳ **Define available time controls**
         self.time_options = {
@@ -76,15 +79,50 @@ class Game:
         elif clicked_piece and clicked_piece.color == self.current_player: # We just selected a piece, making sure the player selected his own pieces
             self.board.selected_piece = clicked_piece
             self.board.valid_moves = [move for move in clicked_piece.get_moves(self.board) if self.board.check_legal_move(clicked_piece, move)]
-
+        
     def switch_turn(self):
-        if self.current_player == "white":
-            self.current_player = "black"
-        else:
-            self.current_player = "white"
+        self.current_player = "white" if self.current_player == "black" else "black"
+
+        if self.mode == "vs_ai" and self.current_player == "black":
+            print("AI is thinking...")
+            self.ai_move()  # AI plays automatically
         
         # 🕰️ Print the updated time after switching turns
         self.display_time()
+
+    def ai_move(self):
+        """AI selects and plays a move."""
+        
+        ai_player = AIPlayer(self.board, "black")
+        best_move = ai_player.get_best_move()  # Assume AIPlayer has a function to get the best move
+        if best_move:
+            piece, new_position = best_move
+            old_position = piece.position
+            clicked_piece = self.board.get_piece(new_position)
+
+            self.history.append((self.board.copy(), self.count_moves)) # save board before moving
+            self.print_board(self.board)
+
+            self.board.move_piece(piece, new_position)
+            move_description = f"{piece.symbol} {self.board.pos_to_chess_notation(old_position)} → {self.board.pos_to_chess_notation(new_position)}"
+            self.move_history.append(move_description)
+            print(move_description)
+
+            print("🔍 État après coup :")
+            self.print_board(self.board)
+
+            # ✅ Réinitialiser le compteur si un pion bouge ou si une capture est faite
+            if piece.__class__.__name__ == "Pawn" or (clicked_piece is not None and clicked_piece.color != self.board.get_piece(new_position).color):
+                self.count_moves = 0
+            else:
+                self.count_moves += 1  # ✅ Incrémentation normale
+
+            print(f"⏳ 50 Moves Rule: {self.count_moves}/100")
+
+            self.board.record_position()  # ✅ Enregistrer la position après le coup
+
+            self.check_victory()
+            self.switch_turn()
 
     def print_board(self, board):
         """Affiche l'échiquier dans le terminal pour debug."""
