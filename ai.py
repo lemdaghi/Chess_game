@@ -9,7 +9,7 @@ class AIPlayer:
         """Retourne un mouvement légal aléatoire pour l'IA."""
         all_moves = self.get_all_legal_moves()
         if not all_moves:
-            return None  # Aucun coup possible (Pat ou Mat)
+            return None  # (Stalemate or Checkmate)
         
         return random.choice(all_moves)
 

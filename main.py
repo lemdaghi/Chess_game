@@ -17,7 +17,7 @@ def choose_time_control():
         "4": "classical"
     }
     
-    return time_modes.get(choice, "rapid")  # Default to Blitz
+    return time_modes.get(choice, "rapid")  # Default to Rapid
 
 def get_player_mode():
     """Prompt the user to choose between playing with another player or AI."""
@@ -53,17 +53,17 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             game.handle_click(pygame.mouse.get_pos())
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_u:  # "U" pour Undo
+            if event.key == pygame.K_u:  # "U" for Undo
                 if player_mode == "vs_ai":
                     game.undo_move()
                 game.undo_move()
-            elif event.key == pygame.K_r:  # "R" pour Restart
+            elif event.key == pygame.K_r:  # "R" for Restart
                 game.restart_game()
 
     font = pygame.font.Font(None, 24)
     for index, move in enumerate(game.get_move_history()):
         text_surface = font.render(move, True, (255, 255, 255))
-        screen.blit(text_surface, (10, 10 + index * 20))  # Affiche l'historique en haut à gauche
+        screen.blit(text_surface, (10, 10 + index * 20))  # Displays history at top left
 
     screen.fill((0, 0, 0))  
     game.board.draw(screen)

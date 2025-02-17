@@ -17,7 +17,7 @@ class Game:
         self.count_moves = 0
         self.mode = mode
 
-        # ⏳ **Define available time controls**
+        # Define available time controls
         self.time_options = {
             "bullet": 60,  # 1 minutes (60 sec)
             "blitz": 300,   # 5 minutes (300 sec) [DEFAULT]
@@ -25,11 +25,11 @@ class Game:
             "classical": 3600  # 1 hour (3600 sec)
         }
 
-        # 🕰️ Initialize player clocks (10 minutes each)
+        # Initialize player clocks (10 minutes each)
         self.time_control = self.time_options.get(time_control, 600)
         self.player_timers = {"white": self.time_control, "black": self.time_control}
 
-        # 🕰️ Start the clock
+        # Start the clock
         self.running = True
         self.clock_thread = threading.Thread(target=self.run_clock)
         self.clock_thread.daemon = True
@@ -37,7 +37,7 @@ class Game:
 
     def handle_click(self, position):
         if self.game_over:
-            print("🚫 La partie est terminée.")
+            print("🚫 Game is Over.")
             self.propose_rematch()
             return
         
@@ -57,22 +57,22 @@ class Game:
                     self.move_history.append(move_description)
                     print(move_description)
 
-                    print("🔍 État après coup :")
+                    print("New chessboard :")
                     self.print_board(self.board)
 
-                    # ✅ Réinitialiser le compteur si un pion bouge ou si une capture est faite
+                    # Update move counter
                     if self.board.selected_piece.__class__.__name__ == "Pawn" or (clicked_piece is not None and clicked_piece.color != self.board.get_piece((x, y)).color):
                         self.count_moves = 0
                     else:
-                        self.count_moves += 1  # ✅ Incrémentation normale
+                        self.count_moves += 1  # Normal increase
 
                     print(f"⏳ 50 Moves Rule: {self.count_moves}/100")
 
-                    self.board.record_position()  # ✅ Enregistrer la position après le coup
+                    self.board.record_position()  # save position
                     self.switch_turn()
                     self.check_victory()
                 else:
-                    print("🚫 Mouvement illégal !")
+                    print("🚫 Illegal move !")
             self.board.selected_piece = None
             self.board.valid_moves = []
 
@@ -87,7 +87,7 @@ class Game:
             print("AI is thinking...")
             self.ai_move()  # AI plays automatically
         
-        # 🕰️ Print the updated time after switching turns
+        # Print the updated time after switching turns
         self.display_time()
 
     def ai_move(self):
@@ -108,24 +108,24 @@ class Game:
             self.move_history.append(move_description)
             print(move_description)
 
-            print("🔍 État après coup :")
+            print("New chessboard :")
             self.print_board(self.board)
 
-            # ✅ Réinitialiser le compteur si un pion bouge ou si une capture est faite
+            # Update move counter
             if piece.__class__.__name__ == "Pawn" or (clicked_piece is not None and clicked_piece.color != self.board.get_piece(new_position).color):
                 self.count_moves = 0
             else:
-                self.count_moves += 1  # ✅ Incrémentation normale
+                self.count_moves += 1  # Normal increase
 
             print(f"⏳ 50 Moves Rule: {self.count_moves}/100")
 
-            self.board.record_position()  # ✅ Enregistrer la position après le coup
+            self.board.record_position()  # Save position
 
             self.check_victory()
             self.switch_turn()
 
     def print_board(self, board):
-        """Affiche l'échiquier dans le terminal pour debug."""
+        """Displays the chessboard in the terminal for debugging."""
         print("\n   a b c d e f g h")
         print("  -----------------")
         for y in range(8):
@@ -139,7 +139,7 @@ class Game:
         print("   a b c d e f g h\n")
 
     def get_move_history(self):
-        """Retourne l'historique des coups joués."""
+        """Returns the history of moves played."""
         return self.move_history
     
     def run_clock(self):
@@ -149,7 +149,7 @@ class Game:
             if not self.game_over:
                 self.player_timers[self.current_player] -= 1
 
-                # 🛑 If a player runs out of time, they lose
+                # If a player runs out of time, they lose
                 if self.player_timers[self.current_player] <= 0:
                     print(f"⏳ {self.current_player.capitalize()} ran out of time! Game Over.")
                     opponent = "white" if self.current_player == "black" else "black"
@@ -179,10 +179,10 @@ class Game:
             return
 
         if self.history:
-            print("📜 Dernier état enregistré avant annulation :")
+            print("📜 Last saved state before undo :")
             self.print_board(self.history[-1][0])
 
-            last_board, last_count_moves = self.history.pop()  # ✅ Restaure l'état du plateau avant le dernier coup
+            last_board, last_count_moves = self.history.pop()  # Restore thr grid before last move
 
             self.board.grid = last_board.grid
             self.current_player = "white" if self.current_player == "black" else "black"
@@ -190,30 +190,30 @@ class Game:
             
             print(f"⏳ 50 Moves Rule after undo : {self.count_moves}/100")
 
-            # ✅ Supprimer le dernier état de position_history pour éviter les erreurs de répétition
+            # Delete the last position_history state to avoid repetition errors
             if isinstance(self.board.position_history, dict) and self.board.position_history:
-                last_key = list(self.board.position_history.keys())[-1]  # Récupère la dernière clé (Python Version >= 3.7, les dictionnaires conservent l'ordre d'ajout)
-                print(f"🗑 Suppression de la dernière position enregistrée : {last_key}")
+                last_key = list(self.board.position_history.keys())[-1]  # Recover last key (Python Version >= 3.7, dictionaries retain the order in which they were added)
+                print(f"🗑 Delete last saved position : {last_key}")
                 self.board.position_history.pop(last_key)
 
-            # ✅ DEBUG : Afficher l'état du plateau après annulation
-            print("🔙 État de la grille après annulation :")
+            # DEBUG : Display tray state after undo
+            print("🔙 Grid state after undo :")
             self.print_board(self.board)
 
             if self.move_history:
                 self.move_history.pop()
-            print("🔄 Annulation : Le dernier coup a été annulé.")
+            print("🔄 Undo : Last move has been canceled.")
         else:
-            print("🚫 Aucun coup à annuler.")
+            print("🚫 No moves to cancel.")
 
     def restart_game(self):
-        self.board = Board()  # ✅ Réinitialise l'échiquier
+        self.board = Board()  # Resets chessboard
         self.current_player = "white"
         self.game_over = False
         self.move_history = []
-        self.history = []  # ✅ Efface l'historique
+        self.history = []  # Clear history
         self.count_moves = 0
-        print("🔄 La partie a été redémarrée.")
+        print("🔄 The game has been restarted.")
 
     def propose_rematch(self):
         """Propose a rematch and reset the game if accepted."""
@@ -225,45 +225,45 @@ class Game:
 
 
     def is_fifty_move_rule(self):
-        """Retourne True si la règle des 50 coups s'applique."""
-        if self.count_moves >= 100:  # ✅ 100 demi-coups = 50 coups complets
-            print("⚖️ Match nul par la règle des 50 coups !")
+        """Returns True if the fifty move rule applies."""
+        if self.count_moves >= 100:
+            print("⚖️ Draw by fifty move rule !")
             return True
         return False
 
 
     def check_victory(self):
-        """Vérifie si la partie est terminée par échec et mat."""
+        """Checks whether the game has ended in checkmate."""
         if ChessRules.is_checkmate(self.board, "white"):
-            print("🏆 Victoire des Noirs par échec et mat !")
+            print("🏆 Black wins by checkmate !")
             self.game_over = True
             return
         elif ChessRules.is_checkmate(self.board, "black"):
-            print("🏆 Victoire des Blancs par échec et mat !")
+            print("🏆 White wins by checkmate !")
             self.game_over = True
             return
         
         if ChessRules.is_stalemate(self.board, self.current_player):
-            print("⚖️ Partie nulle par PAT !")
+            print("⚖️ Draw by stalemate !")
             self.game_over = True
             return
 
         if ChessRules.is_insufficient_material(self.board):
-            print("⚖️ Partie nulle par manque de matériel !")
+            print("⚖️ Draw by insufficient material !")
             self.game_over = True
             return
         
         if self.board.is_triple_repetition():
-            print("⚖️ Partie nulle par triple répétition !")
+            print("⚖️ Draw by threefold !")
             self.game_over = True
             return
         
         if self.is_fifty_move_rule():
-            print("⚖️ Partie nulle par la règle des 50 coups !")
+            print("⚖️ Draw by fifty move rule !")
             self.game_over = True
             return
         
-        # ⏹️ Stop the clock if the game is over
+        # Stop the clock if the game is over
         if self.game_over:
             self.running = False
 

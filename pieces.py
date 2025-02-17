@@ -7,17 +7,17 @@ class Piece :
     def __init__(self, color, position, image_path):
         self.color = color  
         self.position = position  
-        self.image_path = image_path  # ✅ Sauvegarde du chemin de l’image
+        self.image_path = image_path
         self.first_move = True  
 
-        # Chargement de l'image
+        # Load images
         try:
             self.image = pygame.image.load(image_path)
             self.image = pygame.transform.scale(self.image, (60, 60))
         except pygame.error as e:
-            print(f"❌ Erreur lors du chargement de l'image {image_path}: {e}")
+            print(f"❌ Error occured while loading image {image_path}: {e}")
 
-        # Symboles des pièces
+        # Piece Symbols
         piece_symbols = {
             "Pawn": "♙" if color == "white" else "♟",
             "Rook": "♖" if color == "white" else "♜",
@@ -61,8 +61,8 @@ class Pawn(Piece):
             if self.first_move and 0 <= y + 2 * direction < 8 and board.grid[y + 2 * direction][x] is None:
                 moves.append((x, y + 2 * direction))
 
-        ## Eating
-        # Diagonal Eating
+        ## Capture
+        # Diagonal Capture
         for dx in [-1, 1]:
             if 0 <= x + dx < 8 and 0 <= y + direction < 8:
                 target = board.grid[y + direction][x + dx]
@@ -70,13 +70,13 @@ class Pawn(Piece):
                     moves.append((x + dx, y + direction))
 
         # En Passant
-        if board.last_move:  # Vérifie s'il y a eu un dernier mouvement
+        if board.last_move:
             last_piece, (old_x, old_y), (new_x, new_y) = board.last_move
 
-            # Vérifie si le dernier coup était un double-pas d'un pion adverse
+            # Check if the last move was a double-pass of an opponent's pawn
             if isinstance(last_piece, Pawn) and last_piece.color != self.color:
-                if abs(old_y - new_y) == 2 and new_y == y and abs(new_x - x) == 1:  # ✅ Correction de la condition
-                    moves.append((new_x, y + direction))  # ✅ En passant se fait sur la même colonne
+                if abs(old_y - new_y) == 2 and new_y == y and abs(new_x - x) == 1: 
+                    moves.append((new_x, y + direction))
 
         return moves
 
@@ -205,46 +205,46 @@ class King(Piece):
         super().__init__(color, position, image_path)
 
     def get_moves(self, board, simulate = True):
-        """Retourne les mouvements possibles du Roi en excluant les cases attaquées."""
-        from chess_rules import ChessRules  # ✅ Import pour éviter les dépendances circulaires
+        """Returns the King's possible moves, excluding attacked squares."""
+        from chess_rules import ChessRules
         moves = []
         
     
         old_position = self.position
         x, y = old_position
-        directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]  # Toutes les directions
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]  # All directions
 
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
             if 0 <= nx < 8 and 0 <= ny < 8:
-                target_piece = board.get_piece((nx, ny))  # ✅ On sauvegarde la pièce existante
+                target_piece = board.get_piece((nx, ny))  # Save existant pieces
 
                 if target_piece is None or target_piece.color != self.color:
-                    # ✅ Déplacement temporaire du Roi
-                    board.grid[y][x] = None  # Retire le Roi temporairement
-                    board.grid[ny][nx] = self  # Met le Roi sur la nouvelle case
-                    self.position = (nx, ny)  # Met à jour la position temporaire
+                    # Simulate king's moving
+                    board.grid[y][x] = None 
+                    board.grid[ny][nx] = self
+                    self.position = (nx, ny)
 
                     if not ChessRules.is_in_check(board, self.color):  
-                        moves.append((nx, ny))  # ✅ Ajoute la case si elle est sûre
+                        moves.append((nx, ny))  # Add secured squares
 
-                    # ✅ Restauration complète de l'état initial
-                    board.grid[ny][nx] = target_piece  # Remet la pièce d'origine si elle existait
-                    board.grid[y][x] = self  # Remet le Roi à sa place initiale
-                    self.position = old_position  # ✅ On restaure la position du Roi
+                    # Restore initial state
+                    board.grid[ny][nx] = target_piece  
+                    board.grid[y][x] = self  
+                    self.position = old_position  
 
         # Verify Castle
         if self.first_move and not ChessRules.is_in_check(board, self.color):
-            # Grand roque
-            if all(board.get_piece((i, y)) is None for i in range(1, 4)): # aucune piece entre le roi et la tour
+            # Big Castle
+            if all(board.get_piece((i, y)) is None for i in range(1, 4)): # No piece between King and rook
                 rook = board.get_piece((0, y)) # Queen side / left side
                 if rook and isinstance(rook, Rook) and rook.first_move:
                     if not any(ChessRules.is_in_check(board, self.color, (i, y)) for i in range(2, 5)):
                         moves.append((2, y))
 
-            # Petit roque
-            if all(board.get_piece((i, y)) is None for i in range(5, 7)): # aucune piece entre le roi et la tour
-                rook = board.get_piece((7, y)) # Queen side / left side
+            # Small Castle
+            if all(board.get_piece((i, y)) is None for i in range(5, 7)): # No piece between King and rook
+                rook = board.get_piece((7, y)) # King side / right side
                 if rook and isinstance(rook, Rook) and rook.first_move:
                     if not any(ChessRules.is_in_check(board, self.color) for i in range(5, 7)):
                         moves.append((6, y))

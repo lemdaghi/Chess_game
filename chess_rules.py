@@ -2,7 +2,7 @@ class ChessRules:
 
     @staticmethod
     def is_in_check(board, color, position=None, ignore_castling=False):
-        """Retourne True si le Roi de 'color' est en échec, sauf si on ignore la vérification pour le Roque."""
+        """Return True if the 'color' king is checked, unless the check for Castle is ignored."""
         king_pos = None
         
         if position:
@@ -15,41 +15,41 @@ class ChessRules:
                         break
 
         if not king_pos:
-            print('No King')
+            print("🚨 ERROR: King not found !")
             return False
           
         x, y = king_pos
 
-        # ✅ Simulation temporaire en enlevant la pièce à cet endroit
+        # Simulate removing the piece
         temp_piece = board.get_piece(king_pos)
         board.grid[y][x] = None 
         
-        # Vérifier toutes les pièces adverses
+        # Verify all opponent pieces
         in_check = False
         for row in board.grid:
             for piece in row:
                 if piece and piece.color != color and piece.__class__.__name__ != "King":
-                    # ✅ Vérification spéciale pour les Pions
+                    # Special verification for Pawns
                     if piece.__class__.__name__ == "Pawn":
-                        direction = -1 if piece.color == "white" else 1  # Blancs montent, Noirs descendent
-                        for dx in [-1, 1]:  # Attaque en diagonale
+                        direction = -1 if piece.color == "white" else 1  # White goes up, Black goes down
+                        for dx in [-1, 1]:  # Diagonal attack
                             px, py = piece.position
-                            if (px + dx, py + direction) == (x, y):  # Le Roi est sur une case attaquée
+                            if (px + dx, py + direction) == (x, y):  # The King is on an attacked square
                                 in_check = True
                                 break
                     elif king_pos in piece.get_moves(board, simulate=True):
                         in_check = True
                         break  
                     
-        # ✅ Restauration de la pièce d'origine
+        # Restore initial state
         board.grid[y][x] = temp_piece
         return in_check  
 
     @staticmethod
     def is_checkmate(board, color):
-        """Retourne True si le joueur 'color' est échec et mat."""
+        """Return True if 'color' player is Checkmate."""
         if not ChessRules.is_in_check(board, color):
-            return False  # Pas en échec, donc pas de mat.
+            return False  # No Check, no Checkmate.
 
         king = None
         for row in board.grid:
@@ -58,37 +58,37 @@ class ChessRules:
                     king = piece
 
         if king is None:
-            print("🚨 ERREUR: Impossible de trouver le Roi !")
+            print("🚨 ERROR: King not found !")
             return False  
 
-        print(f"⚠️ {color} King est en échec")
-        # 1️⃣ Vérifier si le Roi peut s’échapper
-        original_position = king.position  # ✅ Sauvegarde la position initiale du Roi
-        for move in king.get_moves(board):  # ✅ Teste chaque déplacement possible
-
-            target_piece = board.get_piece(move)  # ✅ On sauvegarde ce qu'il y a à la destination
-            board.grid[original_position[1]][original_position[0]] = None  # ✅ On enlève le Roi temporairement
-            board.grid[move[1]][move[0]] = king  # ✅ On place le Roi à la nouvelle position
-            king.position = move  # ✅ On met à jour la position du Roi
+        print(f"⚠️ {color} King is checked !")
+        # 1️⃣ Verify if king can escape
+        original_position = king.position  # Save king's initial position
+        for move in king.get_moves(board):  # Test every possible move
+            # Simulate the move
+            target_piece = board.get_piece(move) 
+            board.grid[original_position[1]][original_position[0]] = None 
+            board.grid[move[1]][move[0]] = king  
+            king.position = move 
 
             print(f"Testing move: King moves to {move}")
 
             if not ChessRules.is_in_check(board, color):  
                 print(f"King escapes check by moving to {move}")
-                # ✅ Si le Roi peut se déplacer sans être en échec, on restaure l'état et on retourne False
-                board.grid[move[1]][move[0]] = target_piece  # ✅ On remet la pièce capturée si besoin
-                board.grid[original_position[1]][original_position[0]] = king  # ✅ On remet le Roi à sa position
-                king.position = original_position  # ✅ On rétablit la vraie position du Roi
-                return False  # ✅ Ce n'est PAS un échec et mat
-
-            # ✅ Restauration de l’état initial après chaque test
-            board.grid[move[1]][move[0]] = target_piece  # ✅ On remet la pièce mangée (si existante)
-            board.grid[original_position[1]][original_position[0]] = king  # ✅ On remet le Roi à sa position
-            king.position = original_position  # ✅ On restaure la vraie position du Roi
+                # King can escape no checkmate, we restore initial state
+                board.grid[move[1]][move[0]] = target_piece  
+                board.grid[original_position[1]][original_position[0]] = king 
+                king.position = original_position  
+                return False 
+            
+            # Restore initial state after every move
+            board.grid[move[1]][move[0]] = target_piece  
+            board.grid[original_position[1]][original_position[0]] = king  
+            king.position = original_position 
 
         print(f"{color.capitalize()} King is checked and has no escape!")
 
-        # 2️⃣ Vérifier si une autre pièce peut intercepter l’attaque ou capturer l’attaquant
+        # 2️⃣ Verify if another piece can capture or parry the attacker piece
         attackers = []
         for row in board.grid:
             for piece in row:
@@ -97,19 +97,19 @@ class ChessRules:
                         attackers.append(piece)
 
         if len(attackers) > 1:
-            return True  # ✅ Si plusieurs attaquants menacent le Roi, il n'y a aucun moyen de se défendre → ÉCHEC ET MAT.
+            return True  # If many attackers (more than one) are checking the king, and he can not escape -> checkmate
 
-        attacker = attackers[0]  # ✅ S'il n'y a qu'un seul attaquant, on teste si on peut le capturer ou le bloquer
+        attacker = attackers[0]  # There is only 1 attacker
 
-        # 3️⃣ Vérifier si une pièce alliée peut capturer l’attaquant
+        # 3️⃣ Check whether an allied piece can capture the attacker
         for row in board.grid:
             for piece in row:
                 if piece and piece.color == color:
                     if attacker.position in piece.get_moves(board, simulate=True):  
-                        return False  # ✅ Si une pièce peut capturer l'attaquant, ce n'est PAS un mat
+                        return False
 
-        # 4️⃣ Vérifier si on peut interposer une pièce entre l'attaquant et le Roi
-        if attacker.__class__.__name__ != "Knight":  # ✅ Les Cavaliers ne peuvent pas être bloqués
+        # 4️⃣ Check whether an allied piece can parry the attacker
+        if attacker.__class__.__name__ != "Knight":  # Knight attack can not be parried
             print(f"attacker is {attacker.__class__.__name__}")
             x1, y1 = king.position
             x2, y2 = attacker.position
@@ -129,78 +129,78 @@ class ChessRules:
                     if piece and piece.color == color:
                         for move in piece.get_moves(board, simulate=True):  
                             if move in path:
-                                return False  # ✅ Une pièce peut bloquer l'attaque
+                                return False  # A piece can parry the attack
 
-        return True  # ✅ Si rien ne peut sauver le Roi, alors ÉCHEC ET MAT.
+        return True  # Nothing can save the king -> Checkmate
 
     @staticmethod
     def is_stalemate(board, color):
-        """Vérifie si le joueur `color` est en situation de PAT."""
+        """Verify if the `color` player is stalemate."""
         if ChessRules.is_in_check(board, color):
-            return False  # ✅ S'il est en échec, ce n'est pas un PAT
+            return False  # If Check, no Stalemate
 
-        # 🔎 Parcourir toutes les pièces du joueur
+        # Browse all player's pieces
         for row in board.grid:
             for piece in row:
                 if piece and piece.color == color:
-                    valid_moves = piece.get_moves(board)  # Récupérer les mouvements légaux
+                    valid_moves = piece.get_moves(board)  # Recover legal moves
                     
-                    for move in valid_moves[:]:  # ✅ On utilise une copie pour éviter les modifications directes
+                    for move in valid_moves[:]:  # Use a copy
                         if board.check_legal_move(piece, move):  
-                            return False  # ✅ Il y a encore au moins un coup légal → Pas de PAT
+                            return False  # Still at least 1 legal move → No stalemate
                     
-        print("⚖️ Match nul par PAT ! Aucun coup légal possible.")
-        return True  # ✅ Aucun coup légal → C'est un PAT !
+        print("⚖️ Draw by stalemate ! No legal move possible.")
+        return True  # No legal move -> stalemate
 
     @staticmethod
     def is_insufficient_material(board):
-        """Retourne True si la partie est nulle par manque de matériel."""
+        """Return True if there is not enough pieces to checkmate."""
         pieces = []
         bishops = {"light": 0, "dark": 0}
-        has_other_piece = False  # Pour détecter Tour, Reine, Pion, Cavalier
+        has_other_piece = False  # To detect Rook, Queen, Pawn, Knight
 
         for row in board.grid:
             for piece in row:
                 if piece:
                     pieces.append(piece)
 
-                    # Vérification rapide : si une Tour, Reine ou Pion est présent, le mat est possible
+                    # Fast verification : if a Rook, Queen or Pawn is present, Checkmate still possible
                     if piece.__class__.__name__ in ["Rook", "Queen", "Pawn"]:
-                        return False  # 🚫 Pas de matériel insuffisant, mat possible !
+                        return False 
 
-                    # Vérifier si un Cavalier est présent
+                    # Verify if a Knight is present
                     if piece.__class__.__name__ == "Knight":
-                        has_other_piece = True  # Un cavalier seul ne peut pas mater, mais combiné peut-être
+                        has_other_piece = True
 
-                    # Stocker les fous selon leur couleur de case
+                    # Store bishops according to their square color
                     if piece.__class__.__name__ == "Bishop":
                         square_color = (piece.position[0] + piece.position[1]) % 2
                         bishops["light" if square_color == 0 else "dark"] += 1
 
         num_pieces = len(pieces)
 
-        # ✅ Cas 1 : Seulement 2 rois
+        # Case 1: Only 2 kings
         if num_pieces == 2:
-            print("⚖️ Match nul : Matériel insuffisant (Roi vs Roi).")
+            print("⚖️ Draw : Insufficient material (King vs King).")
             return True
 
-        # ✅ Cas 2 : Roi + (Cavalier OU Fou) contre Roi seul
+        # Case 2: King + (Knight OR Bishop) vs Single King
         if num_pieces == 3:
             for piece in pieces:
                 if piece.__class__.__name__ not in ["Bishop", "Knight", "King"]:
                     return False
                 else:
-                    print("⚖️ Match nul : Matériel insuffisant (Roi vs Roi et Cavalier/Fou)")
+                    print("⚖️ Draw : Insufficient material (King vs King et Knight/Bishop)")
                     return True
 
-        # ✅ Cas 3 : Roi et Fou vs Roi et Fou (même couleur de cases)
+        # Case 3: King and Bishop vs King and Bishop (same square's color)
         if num_pieces == 4 and sum(bishops.values()) == 2 and min(bishops.values()) == 0:
-            print("⚖️ Match nul : Matériel insuffisant (Roi et Fou vs Roi et Fou sur même couleur).")
+            print("⚖️ Draw : Insufficient material (King and Bishop vs King and Bishop on same square's color).")
             return True
 
-        # ✅ Cas 4 : Plusieurs Fous mais TOUS sur la même couleur ET aucune autre pièce
+        # Case 4: multiple Bishops but ALL on same square color and no other pieces
         if sum(bishops.values()) > 0 and min(bishops.values()) == 0 and not has_other_piece:
-            print("⚖️ Match nul : Tous les Fous restants sont sur la même couleur et aucune autre pièce ne peut aider.")
+            print("⚖️ Draw : All remaining Bishops are on the same square's color and no other pieces can help.")
             return True
 
-        return False  # Pas de matériel insuffisant
+        return False

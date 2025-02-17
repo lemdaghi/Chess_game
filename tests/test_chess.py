@@ -132,11 +132,11 @@ class TestChess(unittest.TestCase):
         pawn = Pawn("white", (6, 1), "assets/pawn_white.png")
         self.board.grid[1][6] = pawn
         self.assertTrue(self.board.move_piece(pawn, (6, 0)))  # Move to promotion
-        # ✅ Simulate choosing a Queen as promotion (or change it to other pieces)
+        # Simulate choosing a Queen as promotion (or change it to other pieces)
         promoted_piece = Queen("white", (6, 0), "assets/queen_white.png")
         self.board.grid[0][6] = promoted_piece
 
-        # ✅ Ensure the pawn is replaced with a Queen
+        # Ensure the pawn is replaced with a Queen
         new_piece = self.board.get_piece((6, 0))
         self.assertIsInstance(new_piece, Queen)  # Pawn should now be a Queen
         self.assertEqual(new_piece.color, "white")  # Check color consistency
