@@ -100,11 +100,11 @@ class Board:
                 return False  
 
             # Define Castle type
-            if new_x == 6:  # Kingsize
+            if new_x == 6:  # Kingside
                 print("Small Castling")
                 rook_x, rook_new_x = 7, 5
                 path = [(5, y), (6, y)]  # Squares crossed by the king
-            elif new_x == 2:  # Queensize
+            elif new_x == 2:  # Queenside
                 print("Big Castling")
                 rook_x, rook_new_x = 0, 3
                 path = [(3, y), (2, y)]  # Squares crossed by the king
