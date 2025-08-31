@@ -71,6 +71,8 @@ class Board:
 
     def get_piece(self, position):
         x, y = position
+        if not (0 <= x < 8 and 0 <= y < 8):
+            raise IndexError(f"Position out of bounds: {(x, y)}")
         return self.grid[y][x]
 
     def move_piece(self, piece, new_position):

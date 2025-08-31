@@ -11,10 +11,12 @@ class TestBoardSetup(unittest.TestCase):
         """Creates a fresh game state before each test."""
         self.board = Board()
         self.game = Game()
+        
     
     def test_grid_dimensions(self):
         self.assertEqual(len(self.board.grid), 8)
         self.assertTrue(all(len(row) == 8 for row in self.board.grid))
+
 
     def test_selected_defaults(self):
         self.assertIsNone(self.board.selected_piece)
@@ -22,14 +24,19 @@ class TestBoardSetup(unittest.TestCase):
         self.assertIsInstance(self.board.position_history, dict)
         self.assertEqual(self.board.valid_moves, [])
 
+
     def test_initial_piece_placement(self):
         """Test that pieces are in their correct starting positions."""
         # Check pawns
-        for row in range(8):
-            self.assertIsInstance(self.board.get_piece((row, 1)), Pawn)
-            self.assertEqual(self.board.get_piece((row, 1)).color, "black")
-            self.assertIsInstance(self.board.get_piece((row, 1)), Pawn)
-            self.assertEqual(self.board.get_piece((row, 1)).color, "white")
+        for col in range(8):
+            p_black = self.board.get_piece((col, 1))
+            self.assertIsInstance(p_black, Pawn)
+            self.assertEqual(p_black.color, "black")
+
+            p_white = self.board.get_piece((col, 6))
+            self.assertIsInstance(p_white, Pawn)
+            self.assertEqual(p_white.color, "white")
+
         # Check rooks
         self.assertIsInstance(self.board.get_piece((0, 0)), Rook)  # a8
         self.assertEqual(self.board.get_piece((0, 0)).color, "black")
@@ -39,6 +46,7 @@ class TestBoardSetup(unittest.TestCase):
         self.assertEqual(self.board.get_piece((0, 7)).color, "white")
         self.assertIsInstance(self.board.get_piece((7, 7)), Rook)  # h1
         self.assertEqual(self.board.get_piece((7, 7)).color, "white")
+
         # Check knights
         self.assertIsInstance(self.board.get_piece((1, 0)), Knight)  # b8
         self.assertEqual(self.board.get_piece((1, 0)).color, "black")
@@ -48,6 +56,7 @@ class TestBoardSetup(unittest.TestCase):
         self.assertEqual(self.board.get_piece((1, 7)).color, "white")
         self.assertIsInstance(self.board.get_piece((6, 7)), Knight)  # g1
         self.assertEqual(self.board.get_piece((6, 7)).color, "white")
+
         # Check bishops
         self.assertIsInstance(self.board.get_piece((2, 0)), Bishop)  # c8
         self.assertEqual(self.board.get_piece((2, 0)).color, "black")
@@ -57,16 +66,19 @@ class TestBoardSetup(unittest.TestCase):
         self.assertEqual(self.board.get_piece((2, 7)).color, "white")
         self.assertIsInstance(self.board.get_piece((5, 7)), Bishop)  # f1
         self.assertEqual(self.board.get_piece((5, 7)).color, "white")
+
         # Check queens
         self.assertIsInstance(self.board.get_piece((3, 0)), Queen)  # d8
         self.assertEqual(self.board.get_piece((3, 0)).color, "black")
         self.assertIsInstance(self.board.get_piece((3, 7)), Queen)  # d1
         self.assertEqual(self.board.get_piece((3, 7)).color, "white")
+
         # Check kings
         self.assertIsInstance(self.board.get_piece((4, 0)), King)  # e8
         self.assertEqual(self.board.get_piece((4, 0)).color, "black")
         self.assertIsInstance(self.board.get_piece((4, 7)), King)  # e1
         self.assertEqual(self.board.get_piece((4, 7)).color, "white")
+
 
     def test_piece_position_fields_match_grid_coordinates(self):
         # Each piece must have piece.position == (x,y) it's case coordinates
@@ -79,6 +91,7 @@ class TestBoardSetup(unittest.TestCase):
                         f"piece.position does not match {piece.__class__.__name__} at {(x,y)}"
                     )
 
+
     def test_get_piece(self):
         """Test that a piece is correctly retrieved from the board."""
         piece = self.board.get_piece((0, 0))  # a8
@@ -88,6 +101,7 @@ class TestBoardSetup(unittest.TestCase):
         self.assertIsInstance(piece2, Pawn)
         self.assertEqual(piece2.color, "white")
 
+
     def test_get_piece_out_of_bounds_raises(self):
         with self.assertRaises(IndexError):
             _ = self.board.get_piece((8, 0))
@@ -95,6 +109,7 @@ class TestBoardSetup(unittest.TestCase):
             _ = self.board.get_piece((0, 8))
         with self.assertRaises(IndexError):
             _ = self.board.get_piece((-1, 0))
+
 
     def test_pos_to_chess_notation(self):
         """Ensure board positions convert correctly."""
@@ -104,6 +119,7 @@ class TestBoardSetup(unittest.TestCase):
         self.assertEqual(self.board.pos_to_chess_notation((7, 7)), "h1")
         self.assertEqual(self.board.pos_to_chess_notation((4, 6)), "e2")
         self.assertEqual(self.board.pos_to_chess_notation((3, 0)), "d8")
+
 
     def test_copy_board(self):
         """Ensure the board is correctly copied."""
@@ -122,6 +138,7 @@ class TestBoardSetup(unittest.TestCase):
         self.assertIsNotNone(copy_pawn)
         self.assertIsInstance(new_board.get_piece((0, 6)), Pawn)
 
+
     def test_modifying_copy_does_not_affect_original(self):
         new_board = self.board.copy()
 
@@ -132,12 +149,14 @@ class TestBoardSetup(unittest.TestCase):
         self.assertIsNotNone(self.board.get_piece((0, 6)))         # original unchanged
         self.assertIsNone(new_board.get_piece((0, 6)))             # removed in copy
 
+
     def test_record_position(self):
         """Test that positions are recorded correctly."""
         self.board.record_position()
         self.board.record_position()
         self.board.record_position()
         self.assertTrue(self.board.is_triple_repetition())
+
 
 # Run the tests
 if __name__ == '__main__':
